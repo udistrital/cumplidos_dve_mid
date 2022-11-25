@@ -2,7 +2,7 @@ version: '3.4'
 
 services: 
 
-  cumplidos_dve_mid_v2:
+  cumplidos_dve_mid:
 
     image: golang:1.15-alpine
     container_name: ${API_NAME}
