@@ -8,7 +8,7 @@
 package routers
 
 import (
-	"cumplidos_dve_mid/controllers"
+	"github.com/udistrital/cumplidos_dve_mid/controllers"
 
 	"github.com/astaxie/beego"
 )
