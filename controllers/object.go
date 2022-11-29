@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"cumplidos_dve_mid/models"
+	"github.com/udistrital/cumplidos_dve_mid/models"
 	"encoding/json"
 
 	"github.com/astaxie/beego"
