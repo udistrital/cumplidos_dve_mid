@@ -51,7 +51,7 @@ steps:
     - push
 
 - name: go_build
-  image: golang:1.19
+  image: golang:1.15
   commands:
   # - go mod init
   - go get -t
@@ -67,7 +67,7 @@ steps:
     - push
 
 - name: go_run_test
-  image: golang:1.19
+  image: golang:1.15
   commands:
   - go get -t
   - go get github.com/smartystreets/goconvey/convey
@@ -135,7 +135,7 @@ steps:
     - push
 
 - name: update_aws_ecs
-  image: golang:1.19
+  image: golang:1.15
   environment:
     AWS_ACCESS_KEY_ID:
       from_secret: AWS_ACCESS_KEY_ID
