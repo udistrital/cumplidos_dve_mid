@@ -1,12 +1,10 @@
 package controllers
 
 import (
-	"encoding/json"
-	"fmt"
-	
+	"strconv"
+
 	"github.com/astaxie/beego"
 	"github.com/udistrital/cumplidos_dve_mid/helpers"
-	"github.com/udistrital/cumplidos_dve_mid/models"
 )
 
 // InformacionAcademicaController operations for InformacionAcademica
@@ -17,6 +15,7 @@ type InformacionAcademicaController struct{
 // URLMapping ...
 func (c *InformacionAcademicaController) URLMapping(){
 	c.Mapping("ObtenerInfoCoordinador", c.ObtenerInfoCoordinador)
+	c.Mapping("GetContratosDocente", c.GetContratosDocente)
 }
 
 // InformacionAcademicaController ...
@@ -24,53 +23,50 @@ func (c *InformacionAcademicaController) URLMapping(){
 // @Description create ObtenerInfoCoordinador
 // @Param id_dependencia_oikos query int true "Proyecto a obtener información coordinador"
 // @Success 201 {int} models.InformacionCoordinador
+// @Failure 400 Bad Request
 // @Failure 403 :id_dependencia_oikos is empty
 // @router /informacion_coordinador/:id_dependencia_oikos [get]
 func (c *InformacionAcademicaController) ObtenerInfoCoordinador(){
 	defer helpers.ErrorController(c.Controller, "InformacionAcademicaController")
 
-	id_oikos := c.GetString(":id_dependencia_oikos")
-	var temp map[string]interface{}
-	var temp_snies map[string]interface{}
-	var info_coordinador models.InformacionCoordinador
+	id_oikos := c.Ctx.Input.Param(":id_dependencia_oikos")
+	id, err := strconv.Atoi(id_oikos)
 
-	if err := helpers.GetJsonWSO2(beego.AppConfig.String("CumplidosDveUrlWso2") + beego.AppConfig.String("CumplidosDveHomologacion")+"/"+"proyecto_curricular_oikos/"+id_oikos, &temp); err == nil && temp != nil {
-		json_proyecto_curricular, error_json := json.Marshal(temp)
-
-		if error_json == nil {
-			var temp_homologacion models.ObjetoProyectoCurricular
-			if err := json.Unmarshal(json_proyecto_curricular, &temp_homologacion); err == nil {
-				id_proyecto_snies := temp_homologacion.Homologacion.IDSnies
-
-				if err := helpers.GetJsonWSO2(beego.AppConfig.String("CumplidosDveUrlWso2") + beego.AppConfig.String("CumplidosDveAcademica")+"/"+"carrera_snies/"+id_proyecto_snies, &temp_snies); err == nil && temp_snies != nil {
-					json_info_coordinador, error_json := json.Marshal(temp_snies)
-
-					if error_json == nil {
-						var temp_info_coordinador models.InformacionCoordinador
-						if err := json.Unmarshal(json_info_coordinador, &temp_info_coordinador); err == nil {
-
-							fmt.Println(temp_info_coordinador)
-							info_coordinador = temp_info_coordinador
-						} else {
-							fmt.Println(err)
-						}
-					} else {
-						fmt.Println(error_json.Error())
-					}
-				}
-
-			} else {
-				fmt.Println(err)
-			}
-
-		} else {
-			fmt.Println(error_json.Error())
-		}
-	} else {
-		fmt.Println(err)
-
+	if err != nil || id <= 0 {
+		panic(map[string]interface{}{"funcion": "ObtenerInfoCoordinador", "err": helpers.ErrorParametros, "status": "400"})
 	}
 
-	c.Data["json"] = info_coordinador
+	if data, err2:= helpers.CargarInformacionCoordinador(id); err2 == nil && data.CarreraSniesCollection.CarreraSnies != nil{
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Información del coordinador cargada con exito", "Data": data}
+	}else{
+		panic(map[string]interface{}{"funcion": "ObtenerInfoCoordinador", "err": err2, "status": "400"})
+	}
+	c.ServeJSON()
+}
+
+// InformacionAcademicaController ...
+// @Title GetContratosDocente
+// @Description create GetContratosDocente
+// @Param numDocumento query string true "Docente a consultar"
+// @Success 201 {object} []models.ContratosDocentes
+// @Failure 403 body is empty
+// @router /get_contratos_docente/:numDocumento [get]
+func (c *InformacionAcademicaController) GetContratosDocente(){
+	defer helpers.ErrorController(c.Controller, "InformacionAcademicaController")
+
+	numDocumento := c.Ctx.Input.Param(":numDocumento")
+	doc, err := strconv.Atoi(numDocumento)
+
+	if err != nil || doc <= 0 {
+		panic(map[string]interface{}{"funcion": "GetContratosDocente", "err": helpers.ErrorParametros, "status": "400"})
+	}
+
+	if data, err2:= helpers.CargarContratosDocente(doc); err2 == nil && data != nil{
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Contratos del Docente cargados con exito", "Data": data}
+	}else{
+		panic(map[string]interface{}{"funcion": "GetContratosDocente", "err": err2, "status": "400"})
+	}
 	c.ServeJSON()
 }

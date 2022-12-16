@@ -20,6 +20,7 @@ import (
 )
 
 const (
+	JSON_error          string = "Error en el archivo JSON"
 	ErrorParametros     string = "Error en los parametros de ingreso"
 	ErrorBody           string = "Cuerpo de la peticion invalido"
 	CargaResExito       string = "Resoluciones cargadas con exito"

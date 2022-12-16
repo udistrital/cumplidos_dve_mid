@@ -15,6 +15,38 @@
     },
     "basePath": "/v1",
     "paths": {
+        "/informacion_academica/get_contratos_docente/{numDocumento}": {
+            "get": {
+                "tags": [
+                    "informacion_academica"
+                ],
+                "description": "create GetContratosDocente",
+                "operationId": "InformacionAcademicaController.GetContratosDocente",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "numDocumento",
+                        "description": "Docente a consultar",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.ContratosDocentes"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
         "/informacion_academica/informacion_coordinador/{id_dependencia_oikos}": {
             "get": {
                 "tags": [
@@ -36,11 +68,20 @@
                     "201": {
                         "description": "{int} models.InformacionCoordinador"
                     },
+                    "400": {
+                        "description": "Bad Request"
+                    },
                     "403": {
                         "description": ":id_dependencia_oikos is empty"
                     }
                 }
             }
+        }
+    },
+    "definitions": {
+        "models.ContratosDocentes": {
+            "title": "ContratosDocentes",
+            "type": "object"
         }
     },
     "tags": [
