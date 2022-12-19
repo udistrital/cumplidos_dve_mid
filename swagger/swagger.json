@@ -15,7 +15,7 @@
     },
     "basePath": "/v1",
     "paths": {
-        "/informacion_academica/get_contratos_docente/{numDocumento}": {
+        "/informacion_academica/contratos_docente/{numDocumento}": {
             "get": {
                 "tags": [
                     "informacion_academica"

@@ -51,7 +51,7 @@ func (c *InformacionAcademicaController) ObtenerInfoCoordinador(){
 // @Param numDocumento query string true "Docente a consultar"
 // @Success 201 {object} []models.ContratosDocentes
 // @Failure 403 body is empty
-// @router /get_contratos_docente/:numDocumento [get]
+// @router /contratos_docente/:numDocumento [get]
 func (c *InformacionAcademicaController) GetContratosDocente(){
 	defer helpers.ErrorController(c.Controller, "InformacionAcademicaController")
 
