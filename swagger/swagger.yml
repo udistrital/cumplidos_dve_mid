@@ -11,6 +11,135 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 basePath: /v1
 paths:
+  /aprobacion_pago/aprobar_pagos:
+    post:
+      tags:
+      - aprobacion_pago
+      description: create AprobarPagos
+      operationId: AprobacionPagoController.AprobarPagos
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: ""
+  /aprobacion_pago/certificacion_documentos_aprobados/{dependencia}/{mes}/{anio}:
+    get:
+      tags:
+      - aprobacion_pago
+      description: create CertificacionDocumentosAprobados
+      operationId: AprobacionPagoController.CertificacionDocumentosAprobados
+      parameters:
+      - in: query
+        name: dependencia
+        description: Dependencia del contrato en la tabla ordenador_gasto
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: mes
+        description: Mes del pago mensual
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: anio
+        description: Año del pago mensual
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: :anio is empty
+  /aprobacion_pago/dependencia_ordenador/{docordenador}:
+    get:
+      tags:
+      - aprobacion_pago
+      description: create DependenciaOrdenador
+      operationId: AprobacionPagoController.DependenciaOrdenador
+      parameters:
+      - in: query
+        name: docordenador
+        description: Número del documento del ordenador
+        required: true
+        type: string
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: :docordenador is empty
+  /aprobacion_pago/informacion_coordinador/{id_dependencia_oikos}:
+    get:
+      tags:
+      - aprobacion_pago
+      description: create InfoCoordinador
+      operationId: AprobacionPagoController.InfoCoordinador
+      parameters:
+      - in: query
+        name: id_dependencia_oikos
+        description: Proyecto a obtener información coordinador
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "201":
+          description: '{int} models.InformacionCoordinador'
+        "403":
+          description: :id_dependencia_oikos is empty
+  /aprobacion_pago/pago_aprobado/{numero_contrato}/{vigencia}/{mes}/{anio}:
+    get:
+      tags:
+      - aprobacion_pago
+      description: create PagoAprobado
+      operationId: AprobacionPagoController.PagoAprobado
+      parameters:
+      - in: query
+        name: numero_contrato
+        description: Numero de contrato en la tabla contrato general
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: vigencia
+        description: Vigencia del contrato en la tabla contrato general
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: mes
+        description: Mes del pago mensual
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: anio
+        description: Año del pago mensual
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: :anio is empty
+  /aprobacion_pago/solicitudes_ordenador/{docordenador}:
+    get:
+      tags:
+      - aprobacion_pago
+      description: create SolicitudesOrdenador
+      operationId: AprobacionPagoController.SolicitudesOrdenador
+      parameters:
+      - in: query
+        name: docordenador
+        description: Número del documento del ordenador
+        required: true
+        type: string
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: :docordenador is empty
   /informacion_academica/contratos_docente/{numDocumento}:
     get:
       tags:
@@ -60,3 +189,6 @@ tags:
 - name: informacion_academica
   description: |
     InformacionAcademicaController operations for InformacionAcademica
+- name: aprobacion_pago
+  description: |
+    AprobacionPagoController operations for AprobacionPago
