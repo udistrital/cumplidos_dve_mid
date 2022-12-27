@@ -11,254 +11,268 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 basePath: /v1
 paths:
-  /object/:
-    get:
-      tags:
-      - object
-      description: get all objects
-      operationId: ObjectController.GetAll
-      responses:
-        "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/models.Object'
-        "403":
-          description: :objectId is empty
+  /aprobacion_documentos/aprobar_documentos:
     post:
       tags:
-      - object
-      description: create object
-      operationId: ObjectController.Create
-      parameters:
-      - in: body
-        name: body
-        description: The object content
-        required: true
-        schema:
-          $ref: '#/definitions/models.Object'
+      - aprobacion_documentos
+      description: create AprobarSolicitudes
+      operationId: AprobacionDocumentosController.AprobarSolicitudes
       responses:
-        "200":
-          description: '{string} models.Object.Id'
+        "201":
+          description: ""
         "403":
-          description: body is empty
-  /object/{objectId}:
+          description: ""
+  /aprobacion_documentos/certificacion_visto_bueno/{dependencia}/{mes}/{anio}:
     get:
       tags:
-      - object
-      description: find object by objectid
-      operationId: ObjectController.Get
+      - aprobacion_documentos
+      description: create CertificacionVistoBueno
+      operationId: AprobacionDocumentosController.CertificacionVistoBueno
       parameters:
-      - in: path
-        name: objectId
-        description: the objectid you want to get
+      - in: query
+        name: dependencia
+        description: Dependencia del contrato en la tabla vinculacion
         required: true
-        type: string
+        type: integer
+        format: int64
+      - in: query
+        name: mes
+        description: Mes del pago mensual
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: anio
+        description: Año del pago mensual
+        required: true
+        type: integer
+        format: int64
       responses:
-        "200":
+        "201":
           description: ""
-          schema:
-            $ref: '#/definitions/models.Object'
         "403":
-          description: :objectId is empty
-    put:
-      tags:
-      - object
-      description: update the object
-      operationId: ObjectController.Update
-      parameters:
-      - in: path
-        name: objectId
-        description: The objectid you want to update
-        required: true
-        type: string
-      - in: body
-        name: body
-        description: The body
-        required: true
-        schema:
-          $ref: '#/definitions/models.Object'
-      responses:
-        "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/models.Object'
-        "403":
-          description: :objectId is empty
-    delete:
-      tags:
-      - object
-      description: delete the object
-      operationId: ObjectController.Delete
-      parameters:
-      - in: path
-        name: objectId
-        description: The objectId you want to delete
-        required: true
-        type: string
-      responses:
-        "200":
-          description: '{string} delete success!'
-        "403":
-          description: objectId is empty
-  /user/:
+          description: :anio is empty
+  /aprobacion_documentos/solicitudes_coordinador/{doccoordinador}:
     get:
       tags:
-      - user
-      description: get all Users
-      operationId: UserController.GetAll
+      - aprobacion_documentos
+      description: create SolicitudesCoordinador
+      operationId: AprobacionDocumentosController.SolicitudesCoordinador
+      parameters:
+      - in: query
+        name: doccoordinador
+        description: Número del documento del coordinador
+        required: true
+        type: string
       responses:
-        "200":
+        "201":
           description: ""
-          schema:
-            $ref: '#/definitions/models.User'
+        "403":
+          description: :doccoordinador is empty
+  /aprobacion_documentos/solicitudes_supervisor/{docsupervisor}:
+    get:
+      tags:
+      - aprobacion_documentos
+      description: create SolicitudesSupervisor
+      operationId: AprobacionDocumentosController.SolicitudesSupervisor
+      parameters:
+      - in: query
+        name: docsupervisor
+        description: Número del documento del supervisor
+        required: true
+        type: string
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: :docsupervisor is empty
+  /aprobacion_pago/aprobar_pagos:
     post:
       tags:
-      - user
-      description: create users
-      operationId: UserController.CreateUser
-      parameters:
-      - in: body
-        name: body
-        description: body for user content
-        required: true
-        schema:
-          $ref: '#/definitions/models.User'
+      - aprobacion_pago
+      description: create AprobarPagos
+      operationId: AprobacionPagoController.AprobarPagos
       responses:
-        "200":
-          description: '{int} models.User.Id'
+        "201":
+          description: ""
+        "403":
+          description: ""
+  /aprobacion_pago/certificacion_documentos_aprobados/{dependencia}/{mes}/{anio}:
+    get:
+      tags:
+      - aprobacion_pago
+      description: create CertificacionDocumentosAprobados
+      operationId: AprobacionPagoController.CertificacionDocumentosAprobados
+      parameters:
+      - in: query
+        name: dependencia
+        description: Dependencia del contrato en la tabla ordenador_gasto
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: mes
+        description: Mes del pago mensual
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: anio
+        description: Año del pago mensual
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: :anio is empty
+  /aprobacion_pago/dependencia_ordenador/{docordenador}:
+    get:
+      tags:
+      - aprobacion_pago
+      description: create DependenciaOrdenador
+      operationId: AprobacionPagoController.DependenciaOrdenador
+      parameters:
+      - in: query
+        name: docordenador
+        description: Número del documento del ordenador
+        required: true
+        type: string
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: :docordenador is empty
+  /aprobacion_pago/informacion_ordenador/{numero_contrato}/{vigencia}:
+    get:
+      tags:
+      - aprobacion_pago
+      description: create ObtenerInfoOrdenador
+      operationId: AprobacionPagoController.ObtenerInfoOrdenador
+      parameters:
+      - in: query
+        name: numero_contrato
+        description: Numero de contrato en la tabla contrato general
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: vigencia
+        description: Vigencia del contrato en la tabla contrato general
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "201":
+          description: '{int} models.InformacionOrdenador'
+        "403":
+          description: :vigencia is empty
+  /aprobacion_pago/pago_aprobado/{numero_contrato}/{vigencia}/{mes}/{anio}:
+    get:
+      tags:
+      - aprobacion_pago
+      description: create PagoAprobado
+      operationId: AprobacionPagoController.PagoAprobado
+      parameters:
+      - in: query
+        name: numero_contrato
+        description: Numero de contrato en la tabla contrato general
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: vigencia
+        description: Vigencia del contrato en la tabla contrato general
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: mes
+        description: Mes del pago mensual
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: anio
+        description: Año del pago mensual
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: :anio is empty
+  /aprobacion_pago/solicitudes_ordenador/{docordenador}:
+    get:
+      tags:
+      - aprobacion_pago
+      description: create SolicitudesOrdenador
+      operationId: AprobacionPagoController.SolicitudesOrdenador
+      parameters:
+      - in: query
+        name: docordenador
+        description: Número del documento del ordenador
+        required: true
+        type: string
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: :docordenador is empty
+  /informacion_academica/contratos_docente/{numDocumento}:
+    get:
+      tags:
+      - informacion_academica
+      description: create GetContratosDocente
+      operationId: InformacionAcademicaController.GetContratosDocente
+      parameters:
+      - in: query
+        name: numDocumento
+        description: Docente a consultar
+        required: true
+        type: string
+      responses:
+        "201":
+          description: ""
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/models.ContratosDocentes'
         "403":
           description: body is empty
-  /user/{uid}:
+  /informacion_academica/informacion_coordinador/{id_dependencia_oikos}:
     get:
       tags:
-      - user
-      description: get user by uid
-      operationId: UserController.Get
-      parameters:
-      - in: path
-        name: uid
-        description: The key for staticblock
-        required: true
-        type: string
-      responses:
-        "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/models.User'
-        "403":
-          description: :uid is empty
-    put:
-      tags:
-      - user
-      description: update the user
-      operationId: UserController.Update
-      parameters:
-      - in: path
-        name: uid
-        description: The uid you want to update
-        required: true
-        type: string
-      - in: body
-        name: body
-        description: body for user content
-        required: true
-        schema:
-          $ref: '#/definitions/models.User'
-      responses:
-        "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/models.User'
-        "403":
-          description: :uid is not int
-    delete:
-      tags:
-      - user
-      description: delete the user
-      operationId: UserController.Delete
-      parameters:
-      - in: path
-        name: uid
-        description: The uid you want to delete
-        required: true
-        type: string
-      responses:
-        "200":
-          description: '{string} delete success!'
-        "403":
-          description: uid is empty
-  /user/login:
-    get:
-      tags:
-      - user
-      description: Logs user into the system
-      operationId: UserController.Login
+      - informacion_academica
+      description: create ObtenerInfoCoordinador
+      operationId: InformacionAcademicaController.ObtenerInfoCoordinador
       parameters:
       - in: query
-        name: username
-        description: The username for login
+        name: id_dependencia_oikos
+        description: Proyecto a obtener información coordinador
         required: true
-        type: string
-      - in: query
-        name: password
-        description: The password for login
-        required: true
-        type: string
+        type: integer
+        format: int64
       responses:
-        "200":
-          description: '{string} login success'
+        "201":
+          description: '{int} models.InformacionCoordinador'
+        "400":
+          description: Bad Request
         "403":
-          description: user not exist
-  /user/logout:
-    get:
-      tags:
-      - user
-      description: Logs out current logged in user session
-      operationId: UserController.logout
-      responses:
-        "200":
-          description: '{string} logout success'
+          description: :id_dependencia_oikos is empty
 definitions:
-  models.Object:
-    title: Object
+  models.ContratosDocentes:
+    title: ContratosDocentes
     type: object
-    properties:
-      ObjectId:
-        type: string
-      PlayerName:
-        type: string
-      Score:
-        type: integer
-        format: int64
-  models.Profile:
-    title: Profile
-    type: object
-    properties:
-      Address:
-        type: string
-      Age:
-        type: integer
-        format: int64
-      Email:
-        type: string
-      Gender:
-        type: string
-  models.User:
-    title: User
-    type: object
-    properties:
-      Id:
-        type: string
-      Password:
-        type: string
-      Profile:
-        $ref: '#/definitions/models.Profile'
-      Username:
-        type: string
 tags:
-- name: object
+- name: informacion_academica
   description: |
-    Operations about object
-- name: user
+    InformacionAcademicaController operations for InformacionAcademica
+- name: aprobacion_pago
   description: |
-    Operations about Users
+    AprobacionPagoController operations for AprobacionPago
+- name: aprobacion_documentos
+  description: |
+    AprobacionDocumentosController operations for AprobacionDocumentos
