@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"strconv"
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/cumplidos_dve_mid/helpers"
@@ -21,7 +20,7 @@ func (c *AprobacionPagoController) URLMapping(){
 	c.Mapping("SolicitudesOrdenador", c.SolicitudesOrdenador)
 	c.Mapping("DependenciaOrdenador", c.DependenciaOrdenador)
 	c.Mapping("AprobarPagos", c.AprobarPagos)
-	c.Mapping("InfoCoordinador", c.InfoCoordinador)
+	c.Mapping("InfoOrdenador", c.InfoOrdenador)
 }
 
 // AprobacionPagoController ...
@@ -132,7 +131,7 @@ func (c *AprobacionPagoController) DependenciaOrdenador(){
 		panic(map[string]interface{}{"funcion": "DependenciaOrdenador", "err": helpers.ErrorParametros, "status": "400"})
 	}
 
-	if data, err2:= helpers.ObtenerDependenciaOrdenador(doc_ordenador); err2 == nil{
+	if data, err2:= helpers.ObtenerDependenciaOrdenador(doc_ordenador); err2 == nil && data != 0{
 		c.Ctx.Output.SetStatus(200)
 		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Dependencia del ordenador cargadas con exito", "Data": data}
 	}else{
@@ -142,27 +141,29 @@ func (c *AprobacionPagoController) DependenciaOrdenador(){
 }
 
 // AprobacionPagoController ...
-// @Title InfoCoordinador
-// @Description create InfoCoordinador
-// @Param id_dependencia_oikos query int true "Proyecto a obtener información coordinador"
-// @Success 201 {int} models.InformacionCoordinador
-// @Failure 403 :id_dependencia_oikos is empty
-// @router /informacion_coordinador/:id_dependencia_oikos [get]
-func (c *AprobacionPagoController) InfoCoordinador(){
+// @Title ObtenerInfoOrdenador
+// @Description create ObtenerInfoOrdenador
+// @Param numero_contrato query int true "Numero de contrato en la tabla contrato general"
+// @Param vigencia query int true "Vigencia del contrato en la tabla contrato general"
+// @Success 201 {int} models.InformacionOrdenador
+// @Failure 403 :numero_contrato is empty
+// @Failure 403 :vigencia is empty
+// @router /informacion_ordenador/:numero_contrato/:vigencia [get]
+func (c *AprobacionPagoController) InfoOrdenador() {
 	defer helpers.ErrorController(c.Controller, "AprobacionPagoController")
 
-	id_oikos := c.Ctx.Input.Param(":id_dependencia_oikos")
-	id, err := strconv.Atoi(id_oikos)
+	numero_contrato := c.GetString(":numero_contrato")
+	vigencia := c.GetString(":vigencia")
 
-	if err != nil || id <= 0 {
-		panic(map[string]interface{}{"funcion": "InfoCoordinador", "err": helpers.ErrorParametros, "status": "400"})
+	if numero_contrato == "" && vigencia == ""{
+		panic(map[string]interface{}{"funcion": "InfoOrdenador", "err": helpers.ErrorParametros, "status": "400"})
 	}
 
-	if data, err2:= helpers.ObtenerInfoCoordinador(id); err2 == nil && data.CarreraSniesCollection.CarreraSnies != nil{
+	if data, err2:= helpers.ObtenerInfoOrdenador(numero_contrato, vigencia); err2 == nil && data.NumeroDocumento != 0{
 		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Información del coordinador cargada con exito", "Data": data}
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Informacion ordenador cargada con exito", "Data": data}
 	}else{
-		panic(map[string]interface{}{"funcion": "InfoCoordinador", "err": err2, "status": "400"})
+		panic(map[string]interface{}{"funcion": "InfoOrdenador", "err": err2, "status": "400"})
 	}
 	c.ServeJSON()
 }

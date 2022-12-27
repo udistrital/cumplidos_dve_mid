@@ -157,13 +157,14 @@ func ObtenerDependenciaOrdenador(doc_ordenador string) (resultado int, outputErr
 			if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCore") + "ordenador_gasto/?query=DependenciaId:" + strconv.Itoa(jefe.DependenciaId), &ordenadores_gasto); err == nil{
 				for _, ordenador := range ordenadores_gasto{
 					resultado = ordenador.DependenciaId
-					fmt.Println("Dependencia:", ordenador.DependenciaId)
 				}
 			}else{
+				fmt.Println("Error 1")
 				panic(err.Error())
 			}
 		}
 	}else{
+		fmt.Println("Error 2")
 		panic(err.Error())
 	}
 	return resultado, outputError
@@ -212,6 +213,72 @@ func ObtenerInfoCoordinador(DependenciaOikosId int) (info_coordinador models.Inf
 		panic(err.Error())
 	}
 	return info_coordinador, outputError
+}
+
+func ObtenerInfoOrdenador(numero_contrato string, vigencia string) (informacion_ordenador models.InformacionOrdenador, outputError map[string]interface{}) {
+	defer func() {
+		if err := recover(); err != nil {
+			outputError = map[string]interface{}{"funcion": "ObtenerInfoOrdenador", "err": err, "status": "500"}
+			panic(outputError)
+		}
+	}()
+
+	var temp map[string]interface{}
+	var contrato_elaborado models.ContratoElaborado
+	var ordenadores_gasto []models.OrdenadorGasto
+	var jefes_dependencia []models.JefeDependencia
+	var informacion_proveedores []models.InformacionProveedor
+	var ordenadores []models.Ordenador
+
+	if err := GetJsonWSO2(beego.AppConfig.String("CumplidosDveUrlWso2") + beego.AppConfig.String("CumplidosDveNsCrudAdministrativa") + "/" + "contrato_elaborado/" + numero_contrato + "/" + vigencia, &temp); err == nil && temp != nil {
+		json_contrato_elaborado, error_json := json.Marshal(temp)
+		if error_json == nil {
+			if err := json.Unmarshal(json_contrato_elaborado, &contrato_elaborado); err == nil {
+				if contrato_elaborado.Contrato.TipoContrato == "2" || contrato_elaborado.Contrato.TipoContrato == "3" || contrato_elaborado.Contrato.TipoContrato == "18" {
+					if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCore") + "ordenador_gasto/?query=Id:" + contrato_elaborado.Contrato.OrdenadorGasto, &ordenadores_gasto); err == nil {
+						for _, ordenador_gasto := range ordenadores_gasto{
+							if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCore") + "jefe_dependencia/?query=DependenciaId:" + strconv.Itoa(ordenador_gasto.DependenciaId) + "&sortby=FechaInicio&order=desc&limit=1", &jefes_dependencia); err == nil {
+								for _, jefe_dependencia := range jefes_dependencia{
+									if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAgora") + "informacion_proveedor/?query=NumDocumento:" + strconv.Itoa(jefe_dependencia.TerceroId), &informacion_proveedores); err == nil{
+										for _, informacion_proveedor := range informacion_proveedores{
+											informacion_ordenador.NumeroDocumento = jefe_dependencia.TerceroId
+											informacion_ordenador.Cargo = ordenador_gasto.Cargo
+											informacion_ordenador.Nombre = informacion_proveedor.NomProveedor
+											informacion_ordenador.IdDependencia = jefe_dependencia.DependenciaId
+										}
+									}else{
+										panic(err.Error())
+									}
+								}
+							}else{
+								panic(err.Error())
+							}
+						}
+					}else{
+						panic(err.Error())
+					}
+				}else{
+					fmt.Println(contrato_elaborado.Contrato.OrdenadorGasto)
+					if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAgora") + "ordenadores/?query=IdOrdenador:" + contrato_elaborado.Contrato.OrdenadorGasto + "&sortby=FechaInicio&order=desc&limit=1", &ordenadores); err == nil {
+						for _, ordenador := range ordenadores{
+							informacion_ordenador.NumeroDocumento = ordenador.Documento
+							informacion_ordenador.Cargo = ordenador.RolOrdenador
+							informacion_ordenador.Nombre = ordenador.NombreOrdenador
+						}
+					}else{
+						fmt.Println(err)
+					}
+				}
+			}else{
+				panic(err.Error())
+			}
+		}else{
+			panic(error_json.Error())
+		}
+	}else{
+		panic(err.Error())
+	}
+	return informacion_ordenador, outputError
 }
 
 func AprobarMultiplesPagos(m []models.PagoPersonaProyecto) (resultado string, outputError map[string]interface{}){

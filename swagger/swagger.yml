@@ -11,6 +11,81 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 basePath: /v1
 paths:
+  /aprobacion_documentos/aprobar_documentos:
+    post:
+      tags:
+      - aprobacion_documentos
+      description: create AprobarSolicitudes
+      operationId: AprobacionDocumentosController.AprobarSolicitudes
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: ""
+  /aprobacion_documentos/certificacion_visto_bueno/{dependencia}/{mes}/{anio}:
+    get:
+      tags:
+      - aprobacion_documentos
+      description: create CertificacionVistoBueno
+      operationId: AprobacionDocumentosController.CertificacionVistoBueno
+      parameters:
+      - in: query
+        name: dependencia
+        description: Dependencia del contrato en la tabla vinculacion
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: mes
+        description: Mes del pago mensual
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: anio
+        description: Año del pago mensual
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: :anio is empty
+  /aprobacion_documentos/solicitudes_coordinador/{doccoordinador}:
+    get:
+      tags:
+      - aprobacion_documentos
+      description: create SolicitudesCoordinador
+      operationId: AprobacionDocumentosController.SolicitudesCoordinador
+      parameters:
+      - in: query
+        name: doccoordinador
+        description: Número del documento del coordinador
+        required: true
+        type: string
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: :doccoordinador is empty
+  /aprobacion_documentos/solicitudes_supervisor/{docsupervisor}:
+    get:
+      tags:
+      - aprobacion_documentos
+      description: create SolicitudesSupervisor
+      operationId: AprobacionDocumentosController.SolicitudesSupervisor
+      parameters:
+      - in: query
+        name: docsupervisor
+        description: Número del documento del supervisor
+        required: true
+        type: string
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: :docsupervisor is empty
   /aprobacion_pago/aprobar_pagos:
     post:
       tags:
@@ -69,24 +144,30 @@ paths:
           description: ""
         "403":
           description: :docordenador is empty
-  /aprobacion_pago/informacion_coordinador/{id_dependencia_oikos}:
+  /aprobacion_pago/informacion_ordenador/{numero_contrato}/{vigencia}:
     get:
       tags:
       - aprobacion_pago
-      description: create InfoCoordinador
-      operationId: AprobacionPagoController.InfoCoordinador
+      description: create ObtenerInfoOrdenador
+      operationId: AprobacionPagoController.ObtenerInfoOrdenador
       parameters:
       - in: query
-        name: id_dependencia_oikos
-        description: Proyecto a obtener información coordinador
+        name: numero_contrato
+        description: Numero de contrato en la tabla contrato general
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: vigencia
+        description: Vigencia del contrato en la tabla contrato general
         required: true
         type: integer
         format: int64
       responses:
         "201":
-          description: '{int} models.InformacionCoordinador'
+          description: '{int} models.InformacionOrdenador'
         "403":
-          description: :id_dependencia_oikos is empty
+          description: :vigencia is empty
   /aprobacion_pago/pago_aprobado/{numero_contrato}/{vigencia}/{mes}/{anio}:
     get:
       tags:
@@ -192,3 +273,6 @@ tags:
 - name: aprobacion_pago
   description: |
     AprobacionPagoController operations for AprobacionPago
+- name: aprobacion_documentos
+  description: |
+    AprobacionDocumentosController operations for AprobacionDocumentos
