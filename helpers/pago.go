@@ -55,7 +55,7 @@ func CargarCertificacionDocumentosAprobados(dependencia string, mes string, anio
 }
 
 func GetContratosOrdenadorDependencia(dependencia string, fechaInicio string, fechaFin string) (contratos_ordenador_dependencia models.ContratoOrdenadorDependencia) {
-	data := httplib.Get(beego.AppConfig.String("CumplidosDveUrlWso2") + beego.AppConfig.String("CumplidosDveNsCrudAdministrativa") +  "/contratos_ordenador_dependencia/" + dependencia + "/" + fechaInicio + "/" + fechaFin)
+	data := httplib.Get(beego.AppConfig.String("CumplidosDveUrlWso2") + beego.AppConfig.String("CumplidosDveAdministrativa") +  "/contratos_ordenador_dependencia/" + dependencia + "/" + fechaInicio + "/" + fechaFin)
 	data.Header("Accept", "application/json")
 	if err := data.ToJSON(&contratos_ordenador_dependencia); err != nil {
 		fmt.Println(err)
@@ -230,7 +230,7 @@ func ObtenerInfoOrdenador(numero_contrato string, vigencia string) (informacion_
 	var informacion_proveedores []models.InformacionProveedor
 	var ordenadores []models.Ordenador
 
-	if err := GetJsonWSO2(beego.AppConfig.String("CumplidosDveUrlWso2") + beego.AppConfig.String("CumplidosDveNsCrudAdministrativa") + "/" + "contrato_elaborado/" + numero_contrato + "/" + vigencia, &temp); err == nil && temp != nil {
+	if err := GetJsonWSO2(beego.AppConfig.String("CumplidosDveUrlWso2") + beego.AppConfig.String("CumplidosDveAdministrativa") + "/" + "contrato_elaborado/" + numero_contrato + "/" + vigencia, &temp); err == nil && temp != nil {
 		json_contrato_elaborado, error_json := json.Marshal(temp)
 		if error_json == nil {
 			if err := json.Unmarshal(json_contrato_elaborado, &contrato_elaborado); err == nil {
