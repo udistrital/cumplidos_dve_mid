@@ -76,7 +76,7 @@ func ConsultarPagoAprobado(numero_contrato string, vigencia string, mes string, 
 	if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "pago_mensual/?query=NumeroContrato:" + numero_contrato + ",VigenciaContrato:" + vigencia + ",Mes:" + mes + ",Ano:" + anio, &pagos_mensuales); err == nil{
 		if pagos_mensuales != nil{
 			for _, pago_mensual := range pagos_mensuales{
-				if pago_mensual.EstadoPagoMensual.CodigoAbreviacion == "AP"{
+				if pago_mensual.EstadoPagoMensualId == 4497{
 					resultado = true
 				}else{
 					resultado = false
