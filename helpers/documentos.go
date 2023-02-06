@@ -21,7 +21,6 @@ func GetSolicitudesSupervisor(doc_supervisor string) (pagos_personas_proyecto []
 	var vinculaciones_docente []models.VinculacionDocente
 	
 	if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "pago_mensual/?limit=-1&query=EstadoPagoMensual.CodigoAbreviacion:PAD,Responsable:" + doc_supervisor, &pagos_mensuales); err == nil {
-		fmt.Println("Documento:", doc_supervisor)
 		for x, pago_mensual := range pagos_mensuales{
 			if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAgora") + "informacion_proveedor/?query=NumDocumento:" + pago_mensual.Persona, &contratistas); err == nil{
 				for _, contratista := range contratistas{
@@ -60,38 +59,50 @@ func GetSolicitudesCoordinador(doc_coordinador string) (pagos_personas_proyecto 
 		}
 	}()
 
+	var parametro []models.Parametro
 	var pagos_mensuales []models.PagoMensual
 	var contratistas []models.InformacionProveedor
 	var pago_personas_proyecto models.PagoPersonaProyecto
 	var vinculaciones_docente []models.VinculacionDocente
-
-	if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "pago_mensual/?limit=-1&query=EstadoPagoMensual.CodigoAbreviacion:PRC,Responsable:" + doc_coordinador, &pagos_mensuales); err == nil{
-		for x, _ := range pagos_mensuales{
-			if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAgora") + "informacion_proveedor/?query=NumDocumento:" + pagos_mensuales[x].Persona, &contratistas); err == nil{
-				for _, contratista := range contratistas{
-					if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "vinculacion_docente/?limit=-1&query=NumeroContrato:" + pagos_mensuales[x].NumeroContrato + ",Vigencia:" + strconv.FormatFloat(pagos_mensuales[x].VigenciaContrato, 'f', 0, 64), &vinculaciones_docente);err == nil{
-						for y, _ := range vinculaciones_docente{
-							var dep []models.Dependencia
-							if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudOikos") + "dependencia/?query=Id:" + strconv.Itoa(vinculaciones_docente[y].IdProyectoCurricular), &dep); err == nil{
-								for z, _ := range dep{
-									pago_personas_proyecto.PagoMensual = &pagos_mensuales[x]
-									pago_personas_proyecto.NombrePersona = contratista.NomProveedor
-									pago_personas_proyecto.Dependencia = &dep[z]
-									pagos_personas_proyecto = append(pagos_personas_proyecto, pago_personas_proyecto)
+	
+	if err:= GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:PRC_DVE", &parametro); err == nil{
+		if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?limit=-1&query=Responsable:" + doc_coordinador +",EstadoPagoMensualId:" + strconv.Itoa(parametro[0].Id), &pagos_mensuales); err == nil{
+			fmt.Println("Los datos son:")
+			fmt.Println(pagos_mensuales)
+			for x, _ := range pagos_mensuales{
+				if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAgora") + "informacion_proveedor/?query=NumDocumento:" + pagos_mensuales[x].Persona, &contratistas); err == nil{
+					for _, contratista := range contratistas{
+						if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "vinculacion_docente/?limit=-1&query=NumeroContrato:" + pagos_mensuales[x].NumeroContrato + ",Vigencia:" + strconv.FormatFloat(pagos_mensuales[x].VigenciaContrato, 'f', 0, 64), &vinculaciones_docente);err == nil{
+							for y, _ := range vinculaciones_docente{
+								var dep []models.Dependencia
+								if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudOikos") + "dependencia/?query=Id:" + strconv.Itoa(vinculaciones_docente[y].IdProyectoCurricular), &dep); err == nil{
+									for z, _ := range dep{
+										pago_personas_proyecto.PagoMensual = &pagos_mensuales[x]
+										pago_personas_proyecto.NombrePersona = contratista.NomProveedor
+										pago_personas_proyecto.Dependencia = &dep[z]
+										pagos_personas_proyecto = append(pagos_personas_proyecto, pago_personas_proyecto)
+									}
+								}else{
+									fmt.Println("ERROR 5")
+									panic(err.Error())
 								}
-							}else{
-								panic(err.Error())
 							}
+						}else{
+							fmt.Println("ERROR 4")
+							panic(err.Error())
 						}
-					}else{
-						panic(err.Error())
 					}
+				}else{
+					fmt.Println("ERROR 3")
+					panic(err.Error())
 				}
-			}else{
-				panic(err.Error())
 			}
+		}else{
+			fmt.Println("ERROR 2")
+			panic(err.Error())
 		}
 	}else{
+		fmt.Println("ERROR 1")
 		panic(err.Error())
 	}
 	return pagos_personas_proyecto, outputError

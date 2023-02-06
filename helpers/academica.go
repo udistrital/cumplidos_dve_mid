@@ -3,7 +3,7 @@ package helpers
 import (
 	"encoding/json"
 	"strconv"
-	"time"
+	//"time"
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/cumplidos_dve_mid/models"
@@ -81,7 +81,7 @@ func CargarContratosDocente(numDocumento int) (contratosDocentes []models.Contra
 					//If resolucion get
 					if err = GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "resolucion/" + strconv.Itoa(vinculacion.IdResolucion.Id), &res); err == nil{
 						//If nulo
-						if vinculacion.NumeroContrato.Valid == true {
+						//if vinculacion.NumeroContrato.Valid == true {
 							if err = GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAgora") + "acta_inicio/?query=NumeroContrato:" + vinculacion.NumeroContrato.String + ",Vigencia:" + strconv.FormatInt(vinculacion.Vigencia.Int64, 10), &actasInicio); err == nil{
 
 								//If Estado = 4
@@ -90,7 +90,7 @@ func CargarContratosDocente(numDocumento int) (contratosDocentes []models.Contra
 									actaInicio.FechaFin = actaInicio.FechaFin.UTC()
 
 									//fechaInicio<fechaActual<(fechaFin+2 meses) Se da holgura de 2 meses luego de fechaFin para subir cumplidos 
-									if time.Now().After(actaInicio.FechaInicio) && time.Now().Before(actaInicio.FechaFin.AddDate(0, 2, 0)) {
+									//if time.Now().After(actaInicio.FechaInicio) && time.Now().Before(actaInicio.FechaFin.AddDate(0, 2, 0)) {
 									
 										cd.NumeroVinculacion = vinculacion.NumeroContrato.String
 										cd.Vigencia = vinculacion.Vigencia.Int64
@@ -100,12 +100,12 @@ func CargarContratosDocente(numDocumento int) (contratosDocentes []models.Contra
 										cd.NombreDocente = proveedor[0].NomProveedor
 										cd.Dedicacion = vinculacion.IdDedicacion.NombreDedicacion
 										contratosDocentes = append(contratosDocentes, cd)
-									}
+									//}
 								}
 							}else{
 								panic(err.Error())
 							}
-						}
+						//}
 					}else{
 						panic(err.Error())
 					}
