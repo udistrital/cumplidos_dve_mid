@@ -1,18 +1,15 @@
 package models
 
-import (
-	"time"
-)
-
 type PagoMensual struct {
 	Id                int             
 	NumeroContrato    string             
 	VigenciaContrato  float64            
 	Mes               float64            
 	Persona           string             
-	EstadoPagoMensual *EstadoPagoMensual
-	Responsable       string             
-	FechaModificacion time.Time          
+	EstadoPagoMensualId float64  
+	Responsable       string  
+	FechaCreacion	  string
+	FechaModificacion string        
 	CargoResponsable  string             
 	Ano               float64            
 }
