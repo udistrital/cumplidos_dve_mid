@@ -66,10 +66,6 @@ func GetRequestNew(endpoint string, route string, target interface{}) error {
 	var response map[string]interface{}
 	var err error
 	err = GetJson(url, &response)
-	fmt.Println("La URL es:")
-	fmt.Println(url)
-	fmt.Println("La respuesta es:")
-	fmt.Println(response)
 	err = ExtractData(response, &target)
 	return err
 }
