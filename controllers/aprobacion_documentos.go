@@ -114,7 +114,7 @@ func (c *AprobacionDocumentosController) AprobarSolicitudes(){
 		panic(map[string]interface{}{"funcion": "AprobarSolicitudes", "err": helpers.ErrorBody, "status": "400"})
 	}
 
-	var m []models.PagoPersonaProyecto
+	var m []models.PagoMensual
 
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &m); err == nil{
 		if res, err := helpers.AprobarMultiplesSolicitudes(m); err == nil{
