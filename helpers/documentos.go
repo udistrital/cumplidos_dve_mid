@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -15,39 +14,44 @@ func GetSolicitudesSupervisor(doc_supervisor string) (pagos_personas_proyecto []
 			panic(outputError)
 		}
 	}()
-
+	var parametro []models.Parametro
 	var pagos_mensuales []models.PagoMensual
 	var contratistas []models.InformacionProveedor
+	var pago_personas_proyecto models.PagoPersonaProyecto
 	var vinculaciones_docente []models.VinculacionDocente
 	
-	if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "pago_mensual/?limit=-1&query=EstadoPagoMensual.CodigoAbreviacion:PAD,Responsable:" + doc_supervisor, &pagos_mensuales); err == nil {
-		for x, pago_mensual := range pagos_mensuales{
-			if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAgora") + "informacion_proveedor/?query=NumDocumento:" + pago_mensual.Persona, &contratistas); err == nil{
-				for _, contratista := range contratistas{
-					if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "vinculacion_docente/?limit=-1&query=NumeroContrato:" + pago_mensual.NumeroContrato + ",Vigencia:" + strconv.FormatFloat(pago_mensual.VigenciaContrato, 'f', 0, 64), &vinculaciones_docente); err == nil{
-						for _, vinculacion := range vinculaciones_docente{
-							var dep models.Dependencia
-							if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudOikos") + "dependencia/" + strconv.Itoa(vinculacion.IdProyectoCurricular), &dep); err == nil{
-								var pago_personas_proyecto models.PagoPersonaProyecto
-								pago_personas_proyecto.PagoMensual = &pagos_mensuales[x]
-								pago_personas_proyecto.NombrePersona = contratista.NomProveedor
-								pago_personas_proyecto.Dependencia = &dep
-								pagos_personas_proyecto = append(pagos_personas_proyecto, pago_personas_proyecto)
-							}else{
-								panic(err.Error())
+	if err:=GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:PRS_DVE", &parametro); err == nil{
+		if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?limit=-1&query=Responsable:" + doc_supervisor + ",EstadoPagoMensualId:" + strconv.Itoa(parametro[0].Id), &pagos_mensuales); err == nil{
+			for x, pago_mensual := range pagos_mensuales{
+				if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAgora") + "informacion_proveedor/?query=NumDocumento:" + pago_mensual.Persona, &contratistas); err == nil{
+					for _, contratista := range contratistas{
+						if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "vinculacion_docente/?limit=-1&query=NumeroContrato:" + pago_mensual.NumeroContrato + ",Vigencia:" + strconv.FormatFloat(pago_mensual.VigenciaContrato, 'f', 0, 64), &vinculaciones_docente); err == nil{
+							for _, vinculacion := range vinculaciones_docente{
+								var dep models.Dependencia
+								if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudOikos") + "dependencia/" + strconv.Itoa(vinculacion.IdProyectoCurricular), &dep); err == nil{
+									pago_personas_proyecto.PagoMensual = &pagos_mensuales[x]
+									pago_personas_proyecto.NombrePersona = contratista.NomProveedor
+									pago_personas_proyecto.Dependencia = &dep
+									pagos_personas_proyecto = append(pagos_personas_proyecto, pago_personas_proyecto)
+								}else{
+									panic(err.Error())
+								}
 							}
+						}else{
+							panic(err.Error())
 						}
-					}else{
-						panic(err.Error())
 					}
+				}else{
+					panic(err.Error())
 				}
-			}else{
-				panic(err.Error())
 			}
+		}else{
+			panic(err.Error())
 		}
 	}else{
 		panic(err.Error())
 	}
+
 	return pagos_personas_proyecto, outputError
 }
 
@@ -67,8 +71,6 @@ func GetSolicitudesCoordinador(doc_coordinador string) (pagos_personas_proyecto 
 	
 	if err:= GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:PRC_DVE", &parametro); err == nil{
 		if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?limit=-1&query=Responsable:" + doc_coordinador +",EstadoPagoMensualId:" + strconv.Itoa(parametro[0].Id), &pagos_mensuales); err == nil{
-			fmt.Println("Los datos son:")
-			fmt.Println(pagos_mensuales)
 			for x, _ := range pagos_mensuales{
 				if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAgora") + "informacion_proveedor/?query=NumDocumento:" + pagos_mensuales[x].Persona, &contratistas); err == nil{
 					for _, contratista := range contratistas{
@@ -83,26 +85,21 @@ func GetSolicitudesCoordinador(doc_coordinador string) (pagos_personas_proyecto 
 										pagos_personas_proyecto = append(pagos_personas_proyecto, pago_personas_proyecto)
 									}
 								}else{
-									fmt.Println("ERROR 5")
 									panic(err.Error())
 								}
 							}
 						}else{
-							fmt.Println("ERROR 4")
 							panic(err.Error())
 						}
 					}
 				}else{
-					fmt.Println("ERROR 3")
 					panic(err.Error())
 				}
 			}
 		}else{
-			fmt.Println("ERROR 2")
 			panic(err.Error())
 		}
 	}else{
-		fmt.Println("ERROR 1")
 		panic(err.Error())
 	}
 	return pagos_personas_proyecto, outputError
@@ -162,7 +159,7 @@ func CertificacionVistoBueno(dependencia string, mes string, anio string) (perso
 	return personas, outputError
 }
 
-func AprobarMultiplesSolicitudes(v []models.PagoPersonaProyecto) (resultado string, outputError map[string]interface{}){
+func AprobarMultiplesSolicitudes(v []models.PagoMensual) (resultado string, outputError map[string]interface{}){
 	defer func() {
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{"function": "AprobarMultiplesSolicitudes", "err": err, "status": "500"}
@@ -171,16 +168,12 @@ func AprobarMultiplesSolicitudes(v []models.PagoPersonaProyecto) (resultado stri
 	}()
 	
 	var response interface{}
-	var pagos_mensuales []*models.PagoMensual
-	var pago_mensual *models.PagoMensual
 	for _, pm := range v{
-		pago_mensual = pm.PagoMensual
-		pagos_mensuales = append(pagos_mensuales, pago_mensual)
-	}
-	if err := SendJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "tr_aprobacion_masiva_documentos", "POST", &response, pagos_mensuales); err == nil{
-		resultado = "OK"
-	}else{
-		panic(err.Error())
+		if err := SendJson(beego.AppConfig.String("CumplidosDveUrlCrud") + "pago_mensual/" + strconv.Itoa(pm.Id), "PUT",&response, &pm); err == nil{
+			resultado = "OK"
+		}else{
+			panic(err.Error())
+		}
 	}
 	return resultado, outputError
 }
