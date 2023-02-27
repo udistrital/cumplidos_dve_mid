@@ -6,7 +6,7 @@ type PagoMensual struct {
 	VigenciaContrato  float64            
 	Mes               float64            
 	Persona           string             
-	EstadoPagoMensualId float64  
+	EstadoPagoMensualId int  
 	Responsable       string  
 	FechaCreacion	  string
 	FechaModificacion string        
