@@ -1,26 +1,23 @@
 package models
 
-import (
-	"time"
-)
-
 type Resolucion struct {
 	Id                      int
 	NumeroResolucion        string
-	FechaExpedicion         time.Time
+	FechaExpedicion         string
 	Vigencia                int
-	IdDependencia           int
-	IdTipoResolucion        *TipoResolucion
+	DependenciaId           int
+	TipoResolucionId        int
 	PreambuloResolucion     string
 	ConsideracionResolucion string
-	Estado                  bool
-	FechaRegistro           time.Time
-	Objeto                  string
 	NumeroSemanas           int
 	Periodo                 int
 	Titulo                  string
-	IdDependenciaFirma      int
-	PeriodoCarga            int
+	DependenciaFirmaId      int
 	VigenciaCarga           int
+	PeriodoCarga            int
 	CuadroResponsabilidades string
+	NuxeoUid				string
+	Activo                  bool
+	FechaCreacion           string
+	FechaModificacion		string
 }

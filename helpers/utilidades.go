@@ -40,7 +40,7 @@ const (
 
 // Envia una petición con datos al endpoint indicado y extrae la respuesta del campo Data para retornarla
 func SendRequestNew(endpoint string, route string, trequest string, target interface{}, datajson interface{}) error {
-	url := beego.AppConfig.String("ProtocolAdmin") + "://" + beego.AppConfig.String(endpoint) + route
+	url := beego.AppConfig.String("ProtocolAdmin") + beego.AppConfig.String(endpoint) + route
 
 	var response map[string]interface{}
 	var err error
@@ -51,7 +51,7 @@ func SendRequestNew(endpoint string, route string, trequest string, target inter
 
 // Envia una petición con datos a endponts que responden con el body sin encapsular
 func SendRequestLegacy(endpoint string, route string, trequest string, target interface{}, datajson interface{}) error {
-	url := beego.AppConfig.String("ProtocolAdmin") + "://" + beego.AppConfig.String(endpoint) + route
+	url := beego.AppConfig.String("ProtocolAdmin") + beego.AppConfig.String(endpoint) + route
 
 	if err := SendJson(url, trequest, &target, &datajson); err != nil {
 		return err
@@ -62,7 +62,7 @@ func SendRequestLegacy(endpoint string, route string, trequest string, target in
 // Envia una petición al endpoint indicado y extrae la respuesta del campo Data para retornarla
 func GetRequestNew(endpoint string, route string, target interface{}) error {
 	url := beego.AppConfig.String("ProtocolAdmin") + beego.AppConfig.String(endpoint) + route
-
+	
 	var response map[string]interface{}
 	var err error
 	err = GetJson(url, &response)
@@ -72,7 +72,7 @@ func GetRequestNew(endpoint string, route string, target interface{}) error {
 
 // Envia una petición a endponts que responden con el body sin encapsular
 func GetRequestLegacy(endpoint string, route string, target interface{}) error {
-	url := beego.AppConfig.String("ProtocolAdmin") + "://" + beego.AppConfig.String(endpoint) + route
+	url := beego.AppConfig.String("ProtocolAdmin") + beego.AppConfig.String(endpoint) + route
 
 	if err := GetJson(url, target); err != nil {
 		return err
@@ -82,7 +82,7 @@ func GetRequestLegacy(endpoint string, route string, target interface{}) error {
 }
 
 func GetRequestWSO2(service string, route string, target interface{}) error {
-	url := beego.AppConfig.String("ProtocolAdmin") + "://" +
+	url := beego.AppConfig.String("ProtocolAdmin") +
 		beego.AppConfig.String("UrlcrudWSO2") +
 		beego.AppConfig.String(service) + "/" + route
 

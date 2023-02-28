@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/httplib"
 	"github.com/udistrital/cumplidos_dve_mid/models"
 )
 
@@ -23,6 +22,7 @@ func CargarCertificacionDocumentosAprobados(dependencia string, mes string, anio
 	var persona models.Persona
 	var vinculaciones_docente []models.VinculacionDocente
 	var mes_cer, _ = strconv.Atoi(mes)
+	var parametro []models.Parametro
 
 	if mes_cer < 10 {
 		mes = "0" + mes
@@ -31,19 +31,21 @@ func CargarCertificacionDocumentosAprobados(dependencia string, mes string, anio
 	contrato_ordenador_dependencia = GetContratosOrdenadorDependencia(dependencia, anio+"-"+mes, anio+"-"+mes)
 
 	for _, contrato := range contrato_ordenador_dependencia.ContratosOrdenadorDependencia.InformacionContratos{
-		if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "vinculacion_docente/?limit=-1&query=NumeroContrato:" + contrato.NumeroContrato + ",Vigencia:" + contrato.Vigencia, &vinculaciones_docente); err == nil{
+		if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=NumeroContrato:" + contrato.NumeroContrato + ",Vigencia:" + contrato.Vigencia, &vinculaciones_docente); err == nil{
 			for _, vinculacion_docente := range vinculaciones_docente{
-				if vinculacion_docente.NumeroContrato.Valid == true{
-					if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "pago_mensual/?query=EstadoPagoMensual.CodigoAbreviacion:AP,NumeroContrato:" + contrato.NumeroContrato + ",VigenciaContrato:" + contrato.Vigencia + ",Mes:" + strconv.Itoa(mes_cer) + ",Ano:" + anio, &pagos_mensuales); err == nil{
-						if pagos_mensuales == nil {
-							persona.NumDocumento = contrato.Documento
-							persona.Nombre = contrato.NombreContratista
-							persona.NumeroContrato = contrato.NumeroContrato
-							persona.Vigencia, _ = strconv.Atoi(contrato.Vigencia)
-							personas = append(personas, persona)
+				if vinculacion_docente.NumeroContrato != "" {
+					if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:AP_DVE", &parametro); err == nil{
+						if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?query=EstadoPagoMensualId:" + strconv.Itoa(parametro[0].Id) + ",NumeroContrato:" + contrato.NumeroContrato + ",VigenciaContrato:" + contrato.Vigencia + ",Mes:" + strconv.Itoa(mes_cer) + ",Ano:" + anio, &pagos_mensuales); err == nil{
+							if pagos_mensuales == nil {
+								persona.NumDocumento = contrato.Documento
+								persona.Nombre = contrato.NombreContratista
+								persona.NumeroContrato = contrato.NumeroContrato
+								persona.Vigencia, _ = strconv.Atoi(contrato.Vigencia)
+								personas = append(personas, persona)
+							}
+						}else{
+							panic(err.Error())
 						}
-					}else{
-						panic(err.Error())
 					}
 				}
 			}
@@ -55,10 +57,8 @@ func CargarCertificacionDocumentosAprobados(dependencia string, mes string, anio
 }
 
 func GetContratosOrdenadorDependencia(dependencia string, fechaInicio string, fechaFin string) (contratos_ordenador_dependencia models.ContratoOrdenadorDependencia) {
-	data := httplib.Get(beego.AppConfig.String("CumplidosDveUrlWso2") + beego.AppConfig.String("CumplidosDveAdministrativa") +  "/contratos_ordenador_dependencia/" + dependencia + "/" + fechaInicio + "/" + fechaFin)
-	data.Header("Accept", "application/json")
-	if err := data.ToJSON(&contratos_ordenador_dependencia); err != nil {
-		fmt.Println(err)
+	if err := GetJsonWSO2(beego.AppConfig.String("CumplidosDveUrlWso2") + beego.AppConfig.String("CumplidosDveAdministrativa") +  "/contratos_ordenador_dependencia/" + dependencia + "/" + fechaInicio + "/" + fechaFin, &contratos_ordenador_dependencia); err == nil{
+
 	}
 	return contratos_ordenador_dependencia
 }
@@ -72,14 +72,17 @@ func ConsultarPagoAprobado(numero_contrato string, vigencia string, mes string, 
 	}()
 
 	var pagos_mensuales []models.PagoMensual
+	var parametro []models.Parametro
 
-	if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "pago_mensual/?query=NumeroContrato:" + numero_contrato + ",VigenciaContrato:" + vigencia + ",Mes:" + mes + ",Ano:" + anio, &pagos_mensuales); err == nil{
+	if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?query=NumeroContrato:" + numero_contrato + ",VigenciaContrato:" + vigencia + ",Mes:" + mes + ",Ano:" + anio, &pagos_mensuales); err == nil{
 		if pagos_mensuales != nil{
-			for _, pago_mensual := range pagos_mensuales{
-				if pago_mensual.EstadoPagoMensualId == 4497{
-					resultado = true
-				}else{
-					resultado = false
+			if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:AP_DVE", &parametro); err == nil {
+				for _, pago_mensual := range pagos_mensuales{
+					if pago_mensual.EstadoPagoMensualId == parametro[0].Id{
+						resultado = true
+					}else{
+						resultado = false
+					}
 				}
 			}
 		}else{
@@ -104,36 +107,38 @@ func CargarSolicitudesOrdenador(doc_ordenador string, limit int, offset int, err
 	var contratistas []models.InformacionProveedor
 	var pago_personas_proyecto models.PagoPersonaProyecto
 	var vinculaciones_docente []models.VinculacionDocente
-
-	data :=httplib.Get(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "pago_mensual/")
-	data.Param("offset", strconv.Itoa(offset))
-	data.Param("limit", strconv.Itoa(limit))
-	data.Param("query", "EstadoPagoMensual.CodigoAbreviacion:AD,Responsable:" + doc_ordenador)
-
-	if err := data.ToJSON(&pagos_mensuales); err == nil{
-		for x, pago_mensual := range pagos_mensuales{
-			if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAgora") + "informacion_proveedor/?query=NumDocumento:" + pago_mensual.Persona, &contratistas); err == nil{
-				for _, contratista := range contratistas{
-					if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "vinculacion_docente/?limit=-1&query=NumeroContrato:" + pago_mensual.NumeroContrato + ",Vigencia:" + strconv.FormatFloat(pago_mensual.VigenciaContrato, 'f', 0, 64), &vinculaciones_docente); err == nil{
-						for _, vinculacion := range vinculaciones_docente{
-							var dep models.Dependencia
-
-							if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudOikos") + "dependencia/" + strconv.Itoa(vinculacion.IdProyectoCurricular), &dep); err == nil{
-								pago_personas_proyecto.PagoMensual = &pagos_mensuales[x]
-								pago_personas_proyecto.NombrePersona = contratista.NomProveedor
-								pago_personas_proyecto.Dependencia = &dep
-								pagos_personas_proyecto = append(pagos_personas_proyecto, pago_personas_proyecto)
-							}else{
-								panic(err.Error())
+	var parametro []models.Parametro
+	
+	if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:AD_DVE", &parametro); err == nil{
+		fmt.Println("PARAMETROS");
+		fmt.Println(parametro);
+		if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?query=EstadoPagoMensualId:" + strconv.Itoa(parametro[0].Id) + ",Responsable:" + doc_ordenador, &pagos_mensuales); err == nil{
+			for x, pago_mensual := range pagos_mensuales{
+				if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", "informacion_proveedor/?query=NumDocumento:" + pago_mensual.Persona, &contratistas); err == nil{
+					for _, contratista := range contratistas{
+						if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=NumeroContrato:" + pago_mensual.NumeroContrato + ",Vigencia:" + strconv.FormatFloat(pago_mensual.VigenciaContrato, 'f', 0, 64), &vinculaciones_docente); err == nil{
+							for _, vinculacion := range vinculaciones_docente{
+								var dep models.Dependencia
+	
+								if err := GetRequestLegacy("CumplidosDveUrlCrudOikos", "dependencia/" + strconv.Itoa(vinculacion.ProyectoCurricularId), &dep); err == nil{
+									pago_personas_proyecto.PagoMensual = &pagos_mensuales[x]
+									pago_personas_proyecto.NombrePersona = contratista.NomProveedor
+									pago_personas_proyecto.Dependencia = &dep
+									pagos_personas_proyecto = append(pagos_personas_proyecto, pago_personas_proyecto)
+								}else{
+									panic(err.Error())
+								}
 							}
+						}else{
+							panic(err.Error())
 						}
-					}else{
-						panic(err.Error())
 					}
+				}else{
+					panic(err.Error())
 				}
-			}else{
-				panic(err.Error())
 			}
+		}else{
+			panic(err.Error())
 		}
 	}else{
 		panic(err.Error())
@@ -152,9 +157,9 @@ func ObtenerDependenciaOrdenador(doc_ordenador string) (resultado int, outputErr
 	var ordenadores_gasto []models.OrdenadorGasto
 	var jefes_dependencia []models.JefeDependencia
 
-	if err:= GetJson(beego.AppConfig.String("CumplidosDveUrlCore") + "jefe_dependencia/?query=TerceroId:" + doc_ordenador + "&sortby=FechaFin&order=desc&limit=1", &jefes_dependencia); err == nil{
+	if err:= GetRequestLegacy("CumplidosDveUrlCore", "jefe_dependencia/?query=TerceroId:" + doc_ordenador + "&sortby=FechaFin&order=desc&limit=1", &jefes_dependencia); err == nil{
 		for _, jefe := range jefes_dependencia{
-			if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCore") + "ordenador_gasto/?query=DependenciaId:" + strconv.Itoa(jefe.DependenciaId), &ordenadores_gasto); err == nil{
+			if err := GetRequestLegacy("CumplidosDveUrlCore", "ordenador_gasto/?query=DependenciaId:" + strconv.Itoa(jefe.DependenciaId), &ordenadores_gasto); err == nil{
 				for _, ordenador := range ordenadores_gasto{
 					resultado = ordenador.DependenciaId
 				}
@@ -235,11 +240,11 @@ func ObtenerInfoOrdenador(numero_contrato string, vigencia string) (informacion_
 		if error_json == nil {
 			if err := json.Unmarshal(json_contrato_elaborado, &contrato_elaborado); err == nil {
 				if contrato_elaborado.Contrato.TipoContrato == "2" || contrato_elaborado.Contrato.TipoContrato == "3" || contrato_elaborado.Contrato.TipoContrato == "18" {
-					if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCore") + "ordenador_gasto/?query=Id:" + contrato_elaborado.Contrato.OrdenadorGasto, &ordenadores_gasto); err == nil {
+					if err := GetRequestLegacy("CumplidosDveUrlCore", "ordenador_gasto/?query=Id:" + contrato_elaborado.Contrato.OrdenadorGasto, &ordenadores_gasto); err == nil {
 						for _, ordenador_gasto := range ordenadores_gasto{
-							if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCore") + "jefe_dependencia/?query=DependenciaId:" + strconv.Itoa(ordenador_gasto.DependenciaId) + "&sortby=FechaInicio&order=desc&limit=1", &jefes_dependencia); err == nil {
+							if err := GetRequestLegacy("CumplidosDveUrlCore", "jefe_dependencia/?query=DependenciaId:" + strconv.Itoa(ordenador_gasto.DependenciaId) + "&sortby=FechaInicio&order=desc&limit=1", &jefes_dependencia); err == nil {
 								for _, jefe_dependencia := range jefes_dependencia{
-									if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAgora") + "informacion_proveedor/?query=NumDocumento:" + strconv.Itoa(jefe_dependencia.TerceroId), &informacion_proveedores); err == nil{
+									if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", "informacion_proveedor/?query=NumDocumento:" + strconv.Itoa(jefe_dependencia.TerceroId), &informacion_proveedores); err == nil{
 										for _, informacion_proveedor := range informacion_proveedores{
 											informacion_ordenador.NumeroDocumento = jefe_dependencia.TerceroId
 											informacion_ordenador.Cargo = ordenador_gasto.Cargo
@@ -259,7 +264,7 @@ func ObtenerInfoOrdenador(numero_contrato string, vigencia string) (informacion_
 					}
 				}else{
 					fmt.Println(contrato_elaborado.Contrato.OrdenadorGasto)
-					if err := GetJson(beego.AppConfig.String("CumplidosDveUrlCrudAgora") + "ordenadores/?query=IdOrdenador:" + contrato_elaborado.Contrato.OrdenadorGasto + "&sortby=FechaInicio&order=desc&limit=1", &ordenadores); err == nil {
+					if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", "ordenadores/?query=IdOrdenador:" + contrato_elaborado.Contrato.OrdenadorGasto + "&sortby=FechaInicio&order=desc&limit=1", &ordenadores); err == nil {
 						for _, ordenador := range ordenadores{
 							informacion_ordenador.NumeroDocumento = ordenador.Documento
 							informacion_ordenador.Cargo = ordenador.RolOrdenador
