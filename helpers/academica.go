@@ -94,6 +94,7 @@ func CargarContratosDocente(numDocumento int) (contratosDocentes []models.Contra
 										cd.Vigencia = vinculacion.Vigencia
 										cd.Resolucion = res[0].NumeroResolucion
 										cd.Dependencia = dep.Nombre
+										cd.IdDependencia = dep.Id
 										cd.NombreDocente = proveedor[0].NomProveedor
 										cd.Dedicacion = parametro[0].Nombre
 										contratosDocentes = append(contratosDocentes, cd)
