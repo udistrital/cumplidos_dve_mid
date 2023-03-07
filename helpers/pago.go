@@ -109,9 +109,7 @@ func CargarSolicitudesOrdenador(doc_ordenador string, limit int, offset int, err
 	var vinculaciones_docente []models.VinculacionDocente
 	var parametro []models.Parametro
 	
-	if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:AD_DVE", &parametro); err == nil{
-		fmt.Println("PARAMETROS");
-		fmt.Println(parametro);
+	if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:PAD_DVE", &parametro); err == nil{
 		if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?query=EstadoPagoMensualId:" + strconv.Itoa(parametro[0].Id) + ",Responsable:" + doc_ordenador, &pagos_mensuales); err == nil{
 			for x, pago_mensual := range pagos_mensuales{
 				if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", "informacion_proveedor/?query=NumDocumento:" + pago_mensual.Persona, &contratistas); err == nil{
