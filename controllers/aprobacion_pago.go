@@ -181,7 +181,7 @@ func (c *AprobacionPagoController) AprobarPagos(){
 		panic(map[string]interface{}{"funcion": "AprobarPagos", "err": helpers.ErrorBody, "status": "400"})
 	}
 
-	var m []models.PagoPersonaProyecto
+	var m []models.PagoMensual
 
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &m); err == nil{
 		if res, err := helpers.AprobarMultiplesPagos(m); err == nil{

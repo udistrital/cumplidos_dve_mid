@@ -284,7 +284,7 @@ func ObtenerInfoOrdenador(numero_contrato string, vigencia string) (informacion_
 	return informacion_ordenador, outputError
 }
 
-func AprobarMultiplesPagos(m []models.PagoPersonaProyecto) (resultado string, outputError map[string]interface{}){
+func AprobarMultiplesPagos(m []models.PagoMensual) (resultado string, outputError map[string]interface{}){
 	defer func() {
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{"funcion": "AprobarMultiplesPagos", "err": err, "status": "500"}
@@ -293,17 +293,17 @@ func AprobarMultiplesPagos(m []models.PagoPersonaProyecto) (resultado string, ou
 	}()
 
 	var response interface{}
-	var pagos_mensuales []*models.PagoMensual
-	var pago_mensual *models.PagoMensual
+	//var pagos_mensuales []*models.PagoMensual
+	//var pago_mensual *models.PagoMensual
 
 	for _, pm := range m {
-		pago_mensual = pm.PagoMensual
-		pagos_mensuales = append(pagos_mensuales, pago_mensual)
-	}
-	if err := SendJson(beego.AppConfig.String("CumplidosDveUrlCrudAdmin") + "tr_aprobacion_masiva_pagos", "POST", &response, pagos_mensuales); err == nil{
-		resultado = "OK"
-	}else{
-		panic(err.Error())
+		//pago_mensual = pm.PagoMensual
+		//pagos_mensuales = append(pagos_mensuales, pago_mensual)
+		if err := SendRequestNew("CumplidosDveUrlCrud", "pago_mensual/" + strconv.Itoa(pm.Id), "PUT", &response, &pm); err == nil{
+			resultado = "OK"
+		}else{
+			panic(err.Error())
+		}
 	}
 	return resultado, outputError
 }

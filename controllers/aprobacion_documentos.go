@@ -17,6 +17,7 @@ func (c *AprobacionDocumentosController) URLMapping() {
 	c.Mapping("SolicitudesSupervisor", c.SolicitudesSupervisor)
 	c.Mapping("SolicitudesCoordinador", c.SolicitudesCoordinador)
 	c.Mapping("CertificacionVistoBueno", c.CertificacionVistoBueno)
+	c.Mapping("GenerarCertificado", c.GenerarCertificado)
 	c.Mapping("AprobarSolicitudes", c.AprobarSolicitudes)
 }
 
@@ -92,11 +93,81 @@ func (c *AprobacionDocumentosController) CertificacionVistoBueno(){
 		panic(map[string]interface{}{"funcion": "CertificacionVistoBueno", "err": helpers.ErrorParametros, "status": "400"})
 	}
 
-	if data, err2:= helpers.CertificacionVistoBueno(dependencia, mes, anio); err2 == nil && data != nil{
+	if data, err2:= helpers.CertificacionVistoBueno(dependencia, mes, anio); err2 == nil{
 		c.Ctx.Output.SetStatus(200)
 		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Certificaciones de visto bueno cargadas con exito", "Data": data}
 	}else{
 		panic(map[string]interface{}{"funcion": "CertificacionVistoBueno", "err": err2, "status": "400"})
+	}
+	c.ServeJSON()
+}
+
+// AprobacionDocumentosController ...
+// @Title GenerarCertificado
+// @Description create GenerarCertificado
+// @Param proyecto_curricular query string true "Nombre del Proyecto Curricular"
+// @Param mes query string true "Mes del certificado"
+// @Param anio query int true "Año del certificado"
+// @Param periodo query string true "Periodo del certificado"
+// @Success 201
+// @Failure 403 :proyecto_curricular is empty
+// @Failure 403 :mes is empty
+// @Failure 403 :anio is empty
+// @Failure 403 :periodo is empty
+// @router /generar_certificado/:nombre/:proyecto_curricular/:dependencia/:facultad/:mes/:anio/:periodo [get]
+func (c *AprobacionDocumentosController) GenerarCertificado(){
+	defer helpers.ErrorController(c.Controller, "AprobacionDocumentosController")
+
+	nombre := c.GetString(":nombre")
+	proyecto_curricular := c.GetString(":proyecto_curricular")
+	dependencia := c.GetString(":dependencia")
+	facultad := c.GetString(":facultad")
+	mes := c.GetString(":mes")
+	anio := c.GetString(":anio")
+	periodo := c.GetString(":periodo")
+
+	//CONVERTIR EL NOMBRE DEL MES A NÚMERO
+	NumeroMes := ""
+	switch mes{
+	case "ENERO":
+		NumeroMes = "1"
+	case "FEBRERO":
+		NumeroMes = "2"
+	case "MARZO":
+		NumeroMes = "3"
+	case "ABRIL":
+		NumeroMes = "4"
+	case "MAYO":
+		NumeroMes = "5"
+	case "JUNIO":
+		NumeroMes = "6"
+	case "JULIO":
+		NumeroMes = "7"
+	case "AGOSTO":
+		NumeroMes = "8"
+	case "SEPTIEMBRE":
+		NumeroMes = "9"
+	case "OCTUBRE":
+		NumeroMes = "10"
+	case "NOVIEMBRE":
+		NumeroMes = "11"
+	case "DICIEMBRE":
+		NumeroMes = "12"
+	}
+
+	if proyecto_curricular == "" && facultad == "" && mes == "" && anio == "" && periodo == ""{
+		panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": helpers.ErrorParametros, "status": "400"})
+	}
+
+	if docentes_incumplidos, err:= helpers.CertificacionVistoBueno(dependencia, NumeroMes, anio); err == nil{
+		if data, err2:= helpers.GenerarPDF(nombre, proyecto_curricular, docentes_incumplidos, facultad, mes, anio, periodo); err2 == nil{
+			c.Ctx.Output.SetStatus(200)
+			c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Certificado generado exitosamente.", "Data": data}
+		}else{
+			panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": err2, "status": "400"})
+		}
+	}else{
+		panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": err, "status": "400"})
 	}
 	c.ServeJSON()
 }
