@@ -27,6 +27,15 @@ func init() {
 
     beego.GlobalControllerRouter["github.com/udistrital/cumplidos_dve_mid/controllers:AprobacionDocumentosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/cumplidos_dve_mid/controllers:AprobacionDocumentosController"],
         beego.ControllerComments{
+            Method: "GenerarCertificado",
+            Router: "/generar_certificado/:nombre/:proyecto_curricular/:dependencia/:facultad/:mes/:anio/:periodo",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/cumplidos_dve_mid/controllers:AprobacionDocumentosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/cumplidos_dve_mid/controllers:AprobacionDocumentosController"],
+        beego.ControllerComments{
             Method: "SolicitudesCoordinador",
             Router: "/solicitudes_coordinador/:doccoordinador",
             AllowHTTPMethods: []string{"get"},

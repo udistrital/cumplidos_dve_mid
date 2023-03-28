@@ -52,6 +52,39 @@ paths:
           description: ""
         "403":
           description: :anio is empty
+  /aprobacion_documentos/generar_certificado/{nombre}/{proyecto_curricular}/{dependencia}/{facultad}/{mes}/{anio}/{periodo}:
+    get:
+      tags:
+      - aprobacion_documentos
+      description: create GenerarCertificado
+      operationId: AprobacionDocumentosController.GenerarCertificado
+      parameters:
+      - in: query
+        name: proyecto_curricular
+        description: Nombre del Proyecto Curricular
+        required: true
+        type: string
+      - in: query
+        name: mes
+        description: Mes del certificado
+        required: true
+        type: string
+      - in: query
+        name: anio
+        description: Año del certificado
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: periodo
+        description: Periodo del certificado
+        required: true
+        type: string
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: :periodo is empty
   /aprobacion_documentos/solicitudes_coordinador/{doccoordinador}:
     get:
       tags:
