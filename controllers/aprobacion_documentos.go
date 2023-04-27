@@ -37,7 +37,7 @@ func (c *AprobacionDocumentosController) SolicitudesSupervisor(){
 		panic(map[string]interface{}{"funcion": "SolicitudesSupervisor", "err": helpers.ErrorParametros, "status": "400"})
 	}
 
-	if data, err2:= helpers.GetSolicitudesSupervisor(doc_supervisor); err2 == nil && data != nil{
+	if data, err2:= helpers.GetSolicitudesSupervisor(doc_supervisor); err2 == nil{
 		c.Ctx.Output.SetStatus(200)
 		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Solicitudes del supervisor cargadas con exito", "Data": data}
 	}else{
@@ -62,7 +62,7 @@ func (c *AprobacionDocumentosController) SolicitudesCoordinador() {
 		panic(map[string]interface{}{"funcion": "SolicitudesCoordinador", "err": helpers.ErrorParametros, "status": "400"})
 	}
 
-	if data, err2:= helpers.GetSolicitudesCoordinador(doc_coordinador); err2 == nil && data != nil{
+	if data, err2:= helpers.GetSolicitudesCoordinador(doc_coordinador); err2 == nil{
 		c.Ctx.Output.SetStatus(200)
 		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Solicitudes del coordinador cargadas con exito", "Data": data}
 	}else{

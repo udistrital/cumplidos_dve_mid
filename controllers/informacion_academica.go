@@ -62,7 +62,7 @@ func (c *InformacionAcademicaController) GetContratosDocente(){
 		panic(map[string]interface{}{"funcion": "GetContratosDocente", "err": helpers.ErrorParametros, "status": "400"})
 	}
 
-	if data, err2:= helpers.CargarContratosDocente(doc); err2 == nil && data != nil{
+	if data, err2:= helpers.CargarContratosDocente(doc); err2 == nil{
 		c.Ctx.Output.SetStatus(200)
 		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Contratos del Docente cargados con exito", "Data": data}
 	}else{
