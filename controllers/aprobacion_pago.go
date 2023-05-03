@@ -106,7 +106,7 @@ func (c *AprobacionPagoController) SolicitudesOrdenador(){
 		panic(map[string]interface{}{"funcion": "SolicitudesOrdenador", "err": helpers.ErrorParametros, "status": "400"})
 	}
 
-	if data, err2:= helpers.CargarSolicitudesOrdenador(doc_ordenador, limit, offset, err0); err2 == nil && data != nil{
+	if data, err2:= helpers.CargarSolicitudesOrdenador(doc_ordenador, limit, offset, err0); err2 == nil{
 		c.Ctx.Output.SetStatus(200)
 		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Solicitudes del ordenador cargadas con exito", "Data": data}
 	}else{
