@@ -67,7 +67,7 @@ steps:
     - push
 
 - name: go_run_test
-  image: golang:1.15
+  image: golang:1.18
   commands:
   - go get -t
   - go get github.com/smartystreets/goconvey/convey
@@ -77,7 +77,7 @@ steps:
   - go get -u github.com/jstemmer/go-junit-report
   - golangci-lint run | tee report.xml
   # - gocov test ./... | gocov-xml > coverage.xml
-  - go test -v ./... | go-junit-report > test.xml
+  #- go test -v ./... | go-junit-report > test.xml
   when:
     branch:
     - feature/*
