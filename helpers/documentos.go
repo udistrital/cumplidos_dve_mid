@@ -314,7 +314,6 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, docentes_incu
 	pdf.Ln(lineHeight)
 	pdf.WriteAligned(0, lineHeight+1, "Proyecto Curricular " + proyecto, "C")
 
-	fmt.Println("DOCENTES INCUMPLIDOS:", docentes_incumplidos)
 	return pdf, outputError
 }
 
