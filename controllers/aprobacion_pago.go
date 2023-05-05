@@ -45,7 +45,7 @@ func (c *AprobacionPagoController) CertificacionDocumentosAprobados() {
 		panic(map[string]interface{}{"funcion": "CertificacionDocumentosAprobados", "err": helpers.ErrorParametros, "status": "400"})
 	}
 
-	if data, err2:= helpers.CargarCertificacionDocumentosAprobados(dependencia, mes, anio); err2 == nil && data != nil{
+	if data, err2:= helpers.CargarCertificacionDocumentosAprobados(dependencia, mes, anio); err2 == nil{
 		c.Ctx.Output.SetStatus(200)
 		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Certificación documentos aprobados cargada con exito", "Data": data}
 	}else{
