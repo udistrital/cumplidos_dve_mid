@@ -382,7 +382,7 @@ func ConstruirDocumentoOrdenador(nombre string, facultad string, dependencia str
 	
 	pdf.AliasNbPages("")
 	pdf.AddPage()
-    
+
 	pdf.SetAutoPageBreak(false, 25)
 
 	pdf.SetLeftMargin(20)
@@ -398,7 +398,7 @@ func ConstruirDocumentoOrdenador(nombre string, facultad string, dependencia str
 	pdf.MultiCell(0, lineHeight+1, "De acuerdo a la información suministrada por los proyectos curriculares de la " + dependencia_nombre + ", los profesores de Vinculación Especial contratados para el periodo académico " + periodo + ", cumplieron a cabalidad con las funciones docentes en el mes de " + mes + " del presente año.(De acuerdo a calendario académico)", "", "J", false)
 	pdf.Ln(lineHeight * 3)
 
-	if docentes_incumplidos != nil{
+	if len(docentes_incumplidos) != 0{
 		pdf.WriteAligned(0, lineHeight+1, "A excepción de las siguientes novedades: ", "")
 		pdf.Ln(lineHeight * 2)
 		for _, docente := range docentes_incumplidos{
