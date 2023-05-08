@@ -1,11 +1,19 @@
 package helpers
 
 import (
-	"encoding/json"
-	"strconv"
 	"fmt"
+	"time"
+	"bufio"
+	"bytes"
+	"strconv"
+	"net/url"
+	"path/filepath"
+	"encoding/json"
+	"encoding/base64"
 
 	"github.com/astaxie/beego"
+	"github.com/phpdave11/gofpdf"
+	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/cumplidos_dve_mid/models"
 )
 
@@ -282,6 +290,148 @@ func ObtenerInfoOrdenador(numero_contrato string, vigencia string) (informacion_
 		panic(err.Error())
 	}
 	return informacion_ordenador, outputError
+}
+
+func GenerarPDFOrdenador(nombre string, facultad string, dependencia string, docentes_incumplidos []models.Persona, mes string, anio string, periodo string) (encodedPdf string, outputError map[string]interface{}){
+	defer func(){
+		if err := recover(); err != nil {
+			outputError = map[string]interface{}{"function": "GenerarPDF", "err": err, "status": "500"}
+			panic(outputError)
+		}
+	}()
+
+	var pdf *gofpdf.Fpdf
+	var err map[string]interface{}
+
+	if pdf, err = ConstruirDocumentoOrdenador(nombre, facultad, dependencia, docentes_incumplidos, mes, anio, periodo); err != nil {
+		panic(err)
+	}
+	if pdf.Err() {
+		logs.Error(pdf.Error())
+		panic(pdf.Error())
+	}
+	if pdf.Ok() {
+		encodedPdf = encodePDFOrdenador(pdf)
+	}
+	return
+}
+
+func ConstruirDocumentoOrdenador(nombre string, facultad string, dependencia string, docentes_incumplidos []models.Persona, mes string, anio string, periodo string) (doc *gofpdf.Fpdf, outputError map[string]interface{}){
+	defer func(){
+		if err := recover(); err != nil {
+			outputError = map[string]interface{}{"function": "ConstruirDocumento", "err": err, "status": "500"}
+			panic(outputError)
+		}
+	}()
+
+	fontPath := filepath.Join(beego.AppConfig.String("StaticPath"), "fonts")
+	imgPath := filepath.Join(beego.AppConfig.String("StaticPath"), "img")
+	fontSize := 11.0
+	lineHeight := 4.0
+
+	//DESCIFRAR DEPENDENCIA
+	dependencia_nombre, err := url.QueryUnescape(dependencia)
+	if err != nil {
+		fmt.Println("Error al decodificar:", err)
+	}
+
+	//DESCIFRAR NOMBRE
+	decano, err := url.QueryUnescape(nombre)
+	if err != nil {
+		fmt.Println("Error al decodificar:", err)
+	}
+
+	//GENERAR FECHA DEL DÍA DE HOY
+	now:=time.Now()
+
+	meses := map[time.Month]string{
+		time.January:	"Enero",
+		time.February:  "Febrero",
+        time.March:     "Marzo",
+        time.April:     "Abril",
+        time.May:       "Mayo",
+        time.June:      "Junio",
+        time.July:      "Julio",
+        time.August:    "Agosto",
+        time.September: "Septiembre",
+        time.October:   "Octubre",
+        time.November:  "Noviembre",
+        time.December:  "Diciembre",
+	}
+
+	pdf := gofpdf.New("P", "mm", "A4", fontPath)
+	pdf.AddUTF8Font(Calibri, "", "calibri.ttf")
+	pdf.AddUTF8Font(CalibriBold, "B", "calibrib.ttf")
+	pdf.AddUTF8Font(MinionProBoldCn, "B", "MinionPro-BoldCn.ttf")
+	pdf.AddUTF8Font(MinionProMediumCn, "", "MinionPro-MediumCn.ttf")
+	pdf.AddUTF8Font(MinionProBoldItalic, "BI", "MinionProBoldItalic.ttf")
+	
+	pdf.SetTopMargin(85)
+
+	pdf.SetHeaderFuncMode(func() {
+
+		pdf.SetLeftMargin(10)
+		pdf.SetRightMargin(10)
+
+		pdf.ImageOptions(filepath.Join(imgPath, "escudo.png"), 82, 8, 45, 45, false, gofpdf.ImageOptions{ImageType: "PNG", ReadDpi: true}, 0, "")
+		pdf.SetY(65)
+		pdf.SetFont(MinionProBoldCn, "B", fontSize)
+		pdf.WriteAligned(0, lineHeight+1, "EL SUSCRITO DECANO/A DE LA " + dependencia_nombre + " DE LA UNIVERSIDAD DISTRITAL FRANCISCO JOSÉ DE CALDAS", "C")
+		pdf.Ln(lineHeight + 2)
+	}, true)
+	
+	pdf.AliasNbPages("")
+	pdf.AddPage()
+
+	pdf.SetAutoPageBreak(false, 25)
+
+	pdf.SetLeftMargin(20)
+	pdf.SetRightMargin(20)
+
+	pdf.Ln(lineHeight + 10)
+
+	pdf.SetFont(MinionProBoldCn, "B", fontSize)
+	pdf.WriteAligned(0, lineHeight+1, "CERTIFICA QUE:", "C")
+	pdf.Ln(lineHeight + 18)
+
+	pdf.SetFont(Calibri, "", fontSize)
+	pdf.MultiCell(0, lineHeight+1, "De acuerdo a la información suministrada por los proyectos curriculares de la " + dependencia_nombre + ", los profesores de Vinculación Especial contratados para el periodo académico " + periodo + ", cumplieron a cabalidad con las funciones docentes en el mes de " + mes + " del presente año.(De acuerdo a calendario académico)", "", "J", false)
+	pdf.Ln(lineHeight * 3)
+
+	if docentes_incumplidos != nil{
+		pdf.WriteAligned(0, lineHeight+1, "A excepción de las siguientes novedades: ", "")
+		pdf.Ln(lineHeight * 2)
+		for _, docente := range docentes_incumplidos{
+			pdf.WriteAligned(0, lineHeight+1, docente.NumDocumento + " " + docente.Nombre +" " + docente.NumeroContrato + ", no se le aprueba cumplido.", "")
+			pdf.Ln(lineHeight * 2)
+			_, h := pdf.GetPageSize()
+			_, _, _, b := pdf.GetMargins()
+			if pdf.GetY() > h-b-(lineHeight*10) {
+				pdf.AddPage()
+			}
+		}
+	}
+
+	pdf.Ln(lineHeight * 3)
+	pdf.WriteAligned(0, lineHeight+1, "La presente certificación se expide con destino a la División de Recursos Humanos el día " + strconv.Itoa(now.Day()) + " del mes de " + meses[now.Month()] + " de " + strconv.Itoa(now.Year()) + ".", "")
+	pdf.Ln(lineHeight * 12)
+
+	pdf.SetFont(MinionProBoldCn, "B", fontSize)
+	pdf.WriteAligned(0, lineHeight+1, decano, "C")
+	pdf.Ln(lineHeight)
+	pdf.WriteAligned(0, lineHeight+1, "DECANO/A " + dependencia_nombre, "C")
+
+	return pdf, outputError
+}
+
+func encodePDFOrdenador(pdf *gofpdf.Fpdf) string {
+	var buffer bytes.Buffer
+	writer := bufio.NewWriter(&buffer)
+	//pdf.OutputFileAndClose("Certificado.pdf") // para guardar el archivo localmente
+	pdf.Output(writer)
+	writer.Flush()
+	encodedFile := base64.StdEncoding.EncodeToString(buffer.Bytes())
+	return encodedFile
 }
 
 func AprobarMultiplesPagos(m []models.PagoMensual) (resultado string, outputError map[string]interface{}){

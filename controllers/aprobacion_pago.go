@@ -21,6 +21,7 @@ func (c *AprobacionPagoController) URLMapping(){
 	c.Mapping("DependenciaOrdenador", c.DependenciaOrdenador)
 	c.Mapping("AprobarPagos", c.AprobarPagos)
 	c.Mapping("InfoOrdenador", c.InfoOrdenador)
+	c.Mapping("GenerarCertificado", c.GenerarCertificado)
 }
 
 // AprobacionPagoController ...
@@ -168,6 +169,78 @@ func (c *AprobacionPagoController) InfoOrdenador() {
 	c.ServeJSON()
 }
 
+// AprobacionPagoController ...
+// @Title GenerarCertificado
+// @Description create GenerarCertificado
+// @Param nombre query string true "Nombre del Ordenador del Gasto"
+// @Param facultad query string true "Nombre de la Facultad"
+// @Param dependencia query string true "Numero de dependencia"
+// @Param mes query string true "Mes del certificado"
+// @Param anio query int true "Año del certificado"
+// @Param periodo query string true "Periodo del certificado"
+// @Success 201
+// @Failure 403 :nombre is empty
+// @Failure 403 :facultad is empty
+// @Failure 403 :dependencia is empty
+// @Failure 403 :mes is empty
+// @Failure 403 :anio is empty
+// @Failure 403 :periodo is empty
+// @router /generar_certificado/:nombre/:facultad/:dependencia/:mes/:anio/:periodo [get]
+func (c *AprobacionPagoController) GenerarCertificado(){
+	defer helpers.ErrorController(c.Controller, "AprobacionPagoController")
+
+	nombre := c.GetString(":nombre")
+	facultad := c.GetString(":facultad")
+	dependencia := c.GetString(":dependencia")
+	mes := c.GetString(":mes")
+	anio := c.GetString(":anio")
+	periodo := c.GetString(":periodo")
+
+	//CONVERTIR EL NOMBRE DEL MES A NÚMERO
+	NumeroMes := ""
+	switch mes{
+	case "ENERO":
+		NumeroMes = "1"
+	case "FEBRERO":
+		NumeroMes = "2"
+	case "MARZO":
+		NumeroMes = "3"
+	case "ABRIL":
+		NumeroMes = "4"
+	case "MAYO":
+		NumeroMes = "5"
+	case "JUNIO":
+		NumeroMes = "6"
+	case "JULIO":
+		NumeroMes = "7"
+	case "AGOSTO":
+		NumeroMes = "8"
+	case "SEPTIEMBRE":
+		NumeroMes = "9"
+	case "OCTUBRE":
+		NumeroMes = "10"
+	case "NOVIEMBRE":
+		NumeroMes = "11"
+	case "DICIEMBRE":
+		NumeroMes = "12"
+	}
+
+	if nombre == "" && facultad == "" && dependencia == "" && mes == "" && anio == "" && periodo == ""{
+		panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": helpers.ErrorParametros, "status": "400"})
+	}
+
+	if docentes_incumplidos, err:= helpers.CargarCertificacionDocumentosAprobados(facultad, NumeroMes, anio); err == nil{
+		if data, err2:= helpers.GenerarPDFOrdenador(nombre, facultad, dependencia, docentes_incumplidos, mes, anio, periodo); err2 == nil{
+			c.Ctx.Output.SetStatus(200)
+			c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Certificado generado exitosamente.", "Data": data}
+		}else{
+			panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": err2, "status": "400"})
+		}
+	}else{
+		panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": err, "status": "400"})
+	}
+	c.ServeJSON()
+}
 // AprobacionPagoController ...
 // @Title AprobarPagos
 // @Description create AprobarPagos

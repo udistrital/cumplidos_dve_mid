@@ -261,6 +261,68 @@
                 }
             }
         },
+        "/aprobacion_pago/generar_certificado/{nombre}/{facultad}/{dependencia}/{mes}/{anio}/{periodo}": {
+            "get": {
+                "tags": [
+                    "aprobacion_pago"
+                ],
+                "description": "create GenerarCertificado",
+                "operationId": "AprobacionPagoController.GenerarCertificado",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "nombre",
+                        "description": "Nombre del Ordenador del Gasto",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "facultad",
+                        "description": "Nombre de la Facultad",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "dependencia",
+                        "description": "Numero de dependencia",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "mes",
+                        "description": "Mes del certificado",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "anio",
+                        "description": "Año del certificado",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "query",
+                        "name": "periodo",
+                        "description": "Periodo del certificado",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": ""
+                    },
+                    "403": {
+                        "description": ":periodo is empty"
+                    }
+                }
+            }
+        },
         "/aprobacion_pago/informacion_ordenador/{numero_contrato}/{vigencia}": {
             "get": {
                 "tags": [
