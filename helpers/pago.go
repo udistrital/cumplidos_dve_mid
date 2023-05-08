@@ -382,7 +382,7 @@ func ConstruirDocumentoOrdenador(nombre string, facultad string, dependencia str
 	
 	pdf.AliasNbPages("")
 	pdf.AddPage()
-
+    
 	pdf.SetAutoPageBreak(false, 25)
 
 	pdf.SetLeftMargin(20)
