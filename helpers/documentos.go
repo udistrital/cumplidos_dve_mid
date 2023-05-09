@@ -290,9 +290,9 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 	fmt.Println("BANDERA NUMERO CINCO CUATRO")
 	pdf.SetFont(MinionProBoldCn, "B", fontSize)
 	fmt.Println("BANDERA NUMERO CINCO CUATRO-UNO")
-	pdf.MultiCell(0, lineHeight+1, "CERTIFICA QUE:", "", "J", false)
+	pdf.MultiCell(0, lineHeight+1, "CERTIFICA QUE:", "", "C", false)
 	fmt.Println("BANDERA NUMERO CINCO CUATRO-DOS")
-	pdf.Ln(lineHeight + 2)
+	pdf.Ln(lineHeight + 18)
 	fmt.Println("BANDERA NUMERO CINCO CINCO")
 	pdf.SetFont(Calibri, "", fontSize)
 	pdf.MultiCell(0, lineHeight+1, "Los Docentes de Vinculación Especial contratados para el periodo Académico " + periodo + ", del Proyecto Curricular de " + proyecto + " cumplieron a cabalidad con las funciones docentes durante el mes de " + mes + " de " + anio + " (según calendario académico).", "", "J", false)
@@ -314,15 +314,13 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 	
 	fmt.Println("BANDERA NUMERO SEIS")
 	pdf.Ln(lineHeight * 3)
-	pdf.WriteAligned(0, lineHeight+1, "La presente certificación se expide el día " + strconv.Itoa(now.Day()) + " del mes de " + meses[now.Month()] + " de " + strconv.Itoa(now.Year()) + ".", "")
+	pdf.MultiCell(0, lineHeight+1, "La presente certificación se expide el día " + strconv.Itoa(now.Day()) + " del mes de " + meses[now.Month()] + " de " + strconv.Itoa(now.Year()) + ".", "", "J", false)
 	pdf.Ln(lineHeight * 12)
 
 	pdf.SetFont(MinionProBoldCn, "B", fontSize)
-	pdf.WriteAligned(0, lineHeight+1, Coordinador, "C")
-	pdf.Ln(lineHeight)
-	pdf.WriteAligned(0, lineHeight+1, "Coordinador", "C")
-	pdf.Ln(lineHeight)
-	pdf.WriteAligned(0, lineHeight+1, "Proyecto Curricular " + proyecto, "C")
+	pdf.MultiCell(0, lineHeight+1, Coordinador, "","C", false)
+	pdf.MultiCell(0, lineHeight+1, "Coordinador", "", "C", false)
+	pdf.MultiCell(0, lineHeight+1, "Proyecto Curricular " + proyecto, "", "C", false)
 	
 	fmt.Println("BANDERA FINAL")
 	return pdf, outputError
