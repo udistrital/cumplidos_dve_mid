@@ -272,7 +272,7 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 		pdf.ImageOptions(filepath.Join(imgPath, "escudo.png"), 82, 8, 45, 45, false, gofpdf.ImageOptions{ImageType: "PNG", ReadDpi: true}, 0, "")
 		pdf.SetY(65)
 		pdf.SetFont(MinionProBoldCn, "B", fontSize)
-		pdf.WriteAligned(0, lineHeight+1, "EL SUSCRITO COORDINADOR DEL PROYECTO CURRICULAR DE " + proyecto + " DE LA " + Facultad + " DE LA UNIVERSIDAD DISTRITAL FRANCISCO JOSÉ DE CALDAS", "C")
+		pdf.MultiCell(0, lineHeight+1, "EL SUSCRITO COORDINADOR DEL PROYECTO CURRICULAR DE " + proyecto + " DE LA " + Facultad + " DE LA UNIVERSIDAD DISTRITAL FRANCISCO JOSÉ DE CALDAS", "", "C", false)
 		pdf.Ln(lineHeight + 2)
 	}, true)
 
