@@ -177,7 +177,7 @@ func CertificacionVistoBueno(dependencia string, mes string, anio string) (perso
 	return personas, outputError
 }
 
-func GenerarPDF(nombre string, proyecto_curricular string, docentes_incumplidos []models.Persona, facultad string, mes string, anio string, periodo string) (encodedPdf string, outputError map[string]interface{}){
+func GenerarPDF(nombre string, proyecto_curricular string, facultad string, mes string, anio string, periodo string) (encodedPdf string, outputError map[string]interface{}){
 	defer func(){
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{"function": "GenerarPDF", "err": err, "status": "500"}
@@ -188,7 +188,7 @@ func GenerarPDF(nombre string, proyecto_curricular string, docentes_incumplidos 
 	var pdf *gofpdf.Fpdf
 	var err map[string]interface{}
 
-	if pdf, err = ConstruirDocumento(nombre, proyecto_curricular, docentes_incumplidos, facultad, mes, anio, periodo); err != nil {
+	if pdf, err = ConstruirDocumento(nombre, proyecto_curricular, facultad, mes, anio, periodo); err != nil {
 		panic(err)
 	}
 	if pdf.Err() {
@@ -201,14 +201,11 @@ func GenerarPDF(nombre string, proyecto_curricular string, docentes_incumplidos 
 	return
 }
 
-func ConstruirDocumento(nombre string, proyecto_curricular string, docentes_incumplidos []models.Persona, facultad string, mes string, anio string, periodo string) (doc *gofpdf.Fpdf, outputError map[string]interface{}){
+func ConstruirDocumento(nombre string, proyecto_curricular string, facultad string, mes string, anio string, periodo string) (doc *gofpdf.Fpdf, outputError map[string]interface{}){
 	defer func(){
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{"function": "ConstruirDocumento", "err": err, "status": "500"}
 			panic(outputError)
-			panic(nombre)
-			panic(proyecto_curricular)
-			panic(docentes_incumplidos)
 		}
 	}()
 
