@@ -309,7 +309,8 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 			}
 		}
 	}*/
-
+	
+	fmt.Println("BANDERA NUMERO SEIS")
 	pdf.Ln(lineHeight * 3)
 	pdf.WriteAligned(0, lineHeight+1, "La presente certificación se expide el día " + strconv.Itoa(now.Day()) + " del mes de " + meses[now.Month()] + " de " + strconv.Itoa(now.Year()) + ".", "")
 	pdf.Ln(lineHeight * 12)
@@ -320,7 +321,8 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 	pdf.WriteAligned(0, lineHeight+1, "Coordinador", "C")
 	pdf.Ln(lineHeight)
 	pdf.WriteAligned(0, lineHeight+1, "Proyecto Curricular " + proyecto, "C")
-
+	
+	fmt.Println("BANDERA FINAL")
 	return pdf, outputError
 }
 
