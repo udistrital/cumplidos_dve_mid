@@ -209,16 +209,12 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 		}
 	}()
 
-	fmt.Println("NOMBRE:", nombre)
-	fmt.Println("PROYECTO CURRICULAR:", proyecto_curricular)
-	fmt.Println("FACULTAD:", facultad)
-	fmt.Println("MES:", mes)
-	fmt.Println("ANIO:", anio)
-	fmt.Println("PERIODO:", periodo)
 	fontPath := filepath.Join(beego.AppConfig.String("StaticPath"), "fonts")
 	imgPath := filepath.Join(beego.AppConfig.String("StaticPath"), "img")
 	fontSize := 11.0
 	lineHeight := 4.0
+
+	fmt.Println("BANDERA NUMERO UNO")
 	
 	//DESCIFRAR PROYECTO CURRICULAR 
 	proyecto, err := url.QueryUnescape(proyecto_curricular)
@@ -238,6 +234,7 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 		fmt.Println("Error al decodificar:", err)
 	}
 
+	fmt.Println("BANDERA NUMERO DOS")
 	//GENERAR FECHA DEL DÍA DE HOY
 	now:=time.Now()
 
@@ -256,6 +253,7 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
         time.December:  "Diciembre",
 	}
 
+	fmt.Println("BANDERA NUMERO TRES")
 	pdf := gofpdf.New("P", "mm", "A4", fontPath)
 	pdf.AddUTF8Font(Calibri, "", "calibri.ttf")
 	pdf.AddUTF8Font(CalibriBold, "B", "calibrib.ttf")
@@ -264,6 +262,7 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 	pdf.AddUTF8Font(MinionProBoldItalic, "BI", "MinionProBoldItalic.ttf")
 
 	pdf.SetTopMargin(85)
+	fmt.Println("BANDERA NUMERO CUATRO")
 
 	pdf.SetHeaderFuncMode(func() {
 
@@ -276,6 +275,8 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 		pdf.WriteAligned(0, lineHeight+1, "EL SUSCRITO COORDINADOR DEL PROYECTO CURRICULAR DE " + proyecto + " DE LA " + Facultad + " DE LA UNIVERSIDAD DISTRITAL FRANCISCO JOSÉ DE CALDAS", "C")
 		pdf.Ln(lineHeight + 2)
 	}, true)
+
+	fmt.Println("BANDERA NUMERO CINCO")
 	
 	pdf.AliasNbPages("")
 	pdf.AddPage()
