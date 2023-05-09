@@ -206,6 +206,9 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, docentes_incu
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{"function": "ConstruirDocumento", "err": err, "status": "500"}
 			panic(outputError)
+			panic(nombre)
+			panic(proyecto_curricular)
+			panic(docentes_incumplidos)
 		}
 	}()
 
