@@ -209,6 +209,12 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 		}
 	}()
 
+	fmt.Println("NOMBRE:", nombre)
+	fmt.Println("PROYECTO CURRICULAR:", proyecto_curricular)
+	fmt.Println("FACULTAD:", facultad)
+	fmt.Println("MES:", mes)
+	fmt.Println("ANIO:", anio)
+	fmt.Println("PERIODO:", periodo)
 	fontPath := filepath.Join(beego.AppConfig.String("StaticPath"), "fonts")
 	imgPath := filepath.Join(beego.AppConfig.String("StaticPath"), "img")
 	fontSize := 11.0
