@@ -290,7 +290,7 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 	fmt.Println("BANDERA NUMERO CINCO CUATRO")
 	pdf.SetFont(MinionProBoldCn, "B", fontSize)
 	fmt.Println("BANDERA NUMERO CINCO CUATRO-UNO")
-	pdf.WriteAligned(0, lineHeight+1, "CERTIFICA QUE:", "C")
+	pdf.MultiCell(0, lineHeight+1, "CERTIFICA QUE:", "", "J", false)
 	fmt.Println("BANDERA NUMERO CINCO CUATRO-DOS")
 	pdf.Ln(lineHeight + 2)
 	fmt.Println("BANDERA NUMERO CINCO CINCO")
