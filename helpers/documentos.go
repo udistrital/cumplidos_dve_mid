@@ -280,22 +280,22 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 	
 	pdf.AliasNbPages("")
 	pdf.AddPage()
-
+	fmt.Println("BANDERA NUMERO CINCO UNO")
 	pdf.SetAutoPageBreak(false, 25)
-
+	fmt.Println("BANDERA NUMERO CINCO DOS")
 	pdf.SetLeftMargin(20)
 	pdf.SetRightMargin(20)
-
+	fmt.Println("BANDERA NUMERO CINCO TRES")
 	pdf.Ln(lineHeight + 10)
-
+	fmt.Println("BANDERA NUMERO CINCO CUATRO")
 	pdf.SetFont(MinionProBoldCn, "B", fontSize)
 	pdf.WriteAligned(0, lineHeight+1, "CERTIFICA QUE:", "C")
 	pdf.Ln(lineHeight + 18)
-
+	fmt.Println("BANDERA NUMERO CINCO CINCO")
 	pdf.SetFont(Calibri, "", fontSize)
 	pdf.MultiCell(0, lineHeight+1, "Los Docentes de Vinculación Especial contratados para el periodo Académico " + periodo + ", del Proyecto Curricular de " + proyecto + " cumplieron a cabalidad con las funciones docentes durante el mes de " + mes + " de " + anio + " (según calendario académico).", "", "J", false)
 	pdf.Ln(lineHeight * 3)
-	
+	fmt.Println("BANDERA NUMERO CINCO SEIS")
 	/*if docentes_incumplidos != nil{
 		pdf.WriteAligned(0, lineHeight+1, "A excepción de las siguientes novedades: ", "")
 		pdf.Ln(lineHeight * 2)
