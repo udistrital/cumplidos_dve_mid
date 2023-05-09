@@ -226,7 +226,7 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, docentes_incu
 		fmt.Println("Error al decodificar:", err)
 	}
 
-	//DESCIFRAR FACULTAD
+	//DESCIFRAR NOMBRE
 	Coordinador, err := url.QueryUnescape(nombre)
 	if err != nil {
 		fmt.Println("Error al decodificar:", err)
@@ -289,7 +289,7 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, docentes_incu
 	pdf.MultiCell(0, lineHeight+1, "Los Docentes de Vinculación Especial contratados para el periodo Académico " + periodo + ", del Proyecto Curricular de " + proyecto + " cumplieron a cabalidad con las funciones docentes durante el mes de " + mes + " de " + anio + " (según calendario académico).", "", "J", false)
 	pdf.Ln(lineHeight * 3)
 	
-	if docentes_incumplidos != nil{
+	/*if docentes_incumplidos != nil{
 		pdf.WriteAligned(0, lineHeight+1, "A excepción de las siguientes novedades: ", "")
 		pdf.Ln(lineHeight * 2)
 		for _, docente := range docentes_incumplidos{
@@ -301,7 +301,7 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, docentes_incu
 				pdf.AddPage()
 			}
 		}
-	}
+	}*/
 
 	pdf.Ln(lineHeight * 3)
 	pdf.WriteAligned(0, lineHeight+1, "La presente certificación se expide el día " + strconv.Itoa(now.Day()) + " del mes de " + meses[now.Month()] + " de " + strconv.Itoa(now.Year()) + ".", "")
