@@ -177,7 +177,7 @@ func CertificacionVistoBueno(dependencia string, mes string, anio string) (perso
 	return personas, outputError
 }
 
-func GenerarPDF(nombre string, proyecto_curricular string, facultad string, mes string, anio string, periodo string) (encodedPdf string, outputError map[string]interface{}){
+func GenerarPDF(nombre string, proyecto_curricular string, docentes_incumplidos []models.Persona, facultad string, mes string, anio string, periodo string) (encodedPdf string, outputError map[string]interface{}){
 	defer func(){
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{"function": "GenerarPDF", "err": err, "status": "500"}
@@ -188,7 +188,7 @@ func GenerarPDF(nombre string, proyecto_curricular string, facultad string, mes 
 	var pdf *gofpdf.Fpdf
 	var err map[string]interface{}
 
-	if pdf, err = ConstruirDocumento(nombre, proyecto_curricular, facultad, mes, anio, periodo); err != nil {
+	if pdf, err = ConstruirDocumento(nombre, proyecto_curricular, docentes_incumplidos, facultad, mes, anio, periodo); err != nil {
 		panic(err)
 	}
 	if pdf.Err() {
@@ -201,7 +201,7 @@ func GenerarPDF(nombre string, proyecto_curricular string, facultad string, mes 
 	return
 }
 
-func ConstruirDocumento(nombre string, proyecto_curricular string, facultad string, mes string, anio string, periodo string) (doc *gofpdf.Fpdf, outputError map[string]interface{}){
+func ConstruirDocumento(nombre string, proyecto_curricular string, docentes_incumplidos []models.Persona, facultad string, mes string, anio string, periodo string) (doc *gofpdf.Fpdf, outputError map[string]interface{}){
 	defer func(){
 		if err := recover(); err != nil {
 			outputError = map[string]interface{}{"function": "ConstruirDocumento", "err": err, "status": "500"}
@@ -213,8 +213,6 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 	imgPath := filepath.Join(beego.AppConfig.String("StaticPath"), "img")
 	fontSize := 11.0
 	lineHeight := 4.0
-
-	fmt.Println("BANDERA NUMERO UNO")
 	
 	//DESCIFRAR PROYECTO CURRICULAR 
 	proyecto, err := url.QueryUnescape(proyecto_curricular)
@@ -234,7 +232,6 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 		fmt.Println("Error al decodificar:", err)
 	}
 
-	fmt.Println("BANDERA NUMERO DOS")
 	//GENERAR FECHA DEL DÍA DE HOY
 	now:=time.Now()
 
@@ -253,7 +250,6 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
         time.December:  "Diciembre",
 	}
 
-	fmt.Println("BANDERA NUMERO TRES")
 	pdf := gofpdf.New("P", "mm", "A4", fontPath)
 	pdf.AddUTF8Font(Calibri, "", "calibri.ttf")
 	pdf.AddUTF8Font(CalibriBold, "B", "calibrib.ttf")
@@ -262,7 +258,6 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 	pdf.AddUTF8Font(MinionProBoldItalic, "BI", "MinionProBoldItalic.ttf")
 
 	pdf.SetTopMargin(85)
-	fmt.Println("BANDERA NUMERO CUATRO")
 
 	pdf.SetHeaderFuncMode(func() {
 
@@ -272,37 +267,34 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 		pdf.ImageOptions(filepath.Join(imgPath, "escudo.png"), 82, 8, 45, 45, false, gofpdf.ImageOptions{ImageType: "PNG", ReadDpi: true}, 0, "")
 		pdf.SetY(65)
 		pdf.SetFont(MinionProBoldCn, "B", fontSize)
-		pdf.MultiCell(0, lineHeight+1, "EL SUSCRITO COORDINADOR DEL PROYECTO CURRICULAR DE " + proyecto + " DE LA " + Facultad + " DE LA UNIVERSIDAD DISTRITAL FRANCISCO JOSÉ DE CALDAS", "", "C", false)
+		pdf.MultiCell(0, lineHeight+1, "EL SUSCRITO COORDINADOR/A DEL PROYECTO CURRICULAR DE " + proyecto + " DE LA " + Facultad + " DE LA UNIVERSIDAD DISTRITAL FRANCISCO JOSÉ DE CALDAS", "", "C", false)
 		pdf.Ln(lineHeight + 2)
 	}, true)
 
-	fmt.Println("BANDERA NUMERO CINCO")
 	
 	pdf.AliasNbPages("")
 	pdf.AddPage()
-	fmt.Println("BANDERA NUMERO CINCO UNO")
+
 	pdf.SetAutoPageBreak(false, 25)
-	fmt.Println("BANDERA NUMERO CINCO DOS")
+
 	pdf.SetLeftMargin(20)
 	pdf.SetRightMargin(20)
-	fmt.Println("BANDERA NUMERO CINCO TRES")
+
 	pdf.Ln(lineHeight + 10)
-	fmt.Println("BANDERA NUMERO CINCO CUATRO")
+
 	pdf.SetFont(MinionProBoldCn, "B", fontSize)
-	fmt.Println("BANDERA NUMERO CINCO CUATRO-UNO")
 	pdf.MultiCell(0, lineHeight+1, "CERTIFICA QUE:", "", "C", false)
-	fmt.Println("BANDERA NUMERO CINCO CUATRO-DOS")
 	pdf.Ln(lineHeight + 18)
-	fmt.Println("BANDERA NUMERO CINCO CINCO")
+
 	pdf.SetFont(Calibri, "", fontSize)
 	pdf.MultiCell(0, lineHeight+1, "Los Docentes de Vinculación Especial contratados para el periodo Académico " + periodo + ", del Proyecto Curricular de " + proyecto + " cumplieron a cabalidad con las funciones docentes durante el mes de " + mes + " de " + anio + " (según calendario académico).", "", "J", false)
 	pdf.Ln(lineHeight * 3)
-	fmt.Println("BANDERA NUMERO CINCO SEIS")	
-	/*if docentes_incumplidos != nil{
-		pdf.WriteAligned(0, lineHeight+1, "A excepción de las siguientes novedades: ", "")
+
+	if docentes_incumplidos != nil{
+		pdf.MultiCell(0, lineHeight+1, "A excepción de las siguientes novedades: ", "", "J", false)
 		pdf.Ln(lineHeight * 2)
 		for _, docente := range docentes_incumplidos{
-			pdf.WriteAligned(0, lineHeight+1, docente.NumDocumento + " " + docente.Nombre +" " + docente.NumeroContrato + ", no se le aprueba cumplido.", "")
+			pdf.MultiCell(0, lineHeight+1, docente.NumDocumento + " " + docente.Nombre +" " + docente.NumeroContrato + ", no se le aprueba cumplido.", "", "J", false)
 			pdf.Ln(lineHeight * 2)
 			_, h := pdf.GetPageSize()
 			_, _, _, b := pdf.GetMargins()
@@ -310,19 +302,17 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, facultad stri
 				pdf.AddPage()
 			}
 		}
-	}*/
+	}
 	
-	fmt.Println("BANDERA NUMERO SEIS")
 	pdf.Ln(lineHeight * 3)
 	pdf.MultiCell(0, lineHeight+1, "La presente certificación se expide el día " + strconv.Itoa(now.Day()) + " del mes de " + meses[now.Month()] + " de " + strconv.Itoa(now.Year()) + ".", "", "J", false)
 	pdf.Ln(lineHeight * 12)
 
 	pdf.SetFont(MinionProBoldCn, "B", fontSize)
 	pdf.MultiCell(0, lineHeight+1, Coordinador, "","C", false)
-	pdf.MultiCell(0, lineHeight+1, "Coordinador", "", "C", false)
+	pdf.MultiCell(0, lineHeight+1, "Coordinador/a", "", "C", false)
 	pdf.MultiCell(0, lineHeight+1, "Proyecto Curricular " + proyecto, "", "C", false)
 	
-	fmt.Println("BANDERA FINAL")
 	return pdf, outputError
 }
 

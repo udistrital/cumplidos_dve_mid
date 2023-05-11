@@ -62,7 +62,7 @@ func SendRequestLegacy(endpoint string, route string, trequest string, target in
 // Envia una petición al endpoint indicado y extrae la respuesta del campo Data para retornarla
 func GetRequestNew(endpoint string, route string, target interface{}) error {
 	url := beego.AppConfig.String("ProtocolAdmin") + beego.AppConfig.String(endpoint) + route
-	fmt.Println(url)
+	
 	var response map[string]interface{}
 	var err error
 	err = GetJson(url, &response)
@@ -73,7 +73,7 @@ func GetRequestNew(endpoint string, route string, target interface{}) error {
 // Envia una petición a endponts que responden con el body sin encapsular
 func GetRequestLegacy(endpoint string, route string, target interface{}) error {
 	url := beego.AppConfig.String("ProtocolAdmin") + beego.AppConfig.String(endpoint) + route
-	fmt.Println(url)
+
 	if err := GetJson(url, target); err != nil {
 		return err
 	}
