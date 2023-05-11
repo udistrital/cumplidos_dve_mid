@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
+	
 	"github.com/astaxie/beego"
 	"github.com/udistrital/cumplidos_dve_mid/helpers"
 	"github.com/udistrital/cumplidos_dve_mid/models"
@@ -156,18 +156,17 @@ func (c *AprobacionDocumentosController) GenerarCertificado(){
 		NumeroMes = "12"
 	}
 
-	fmt.Println(NumeroMes)
-	fmt.Println(dependencia)
 	if proyecto_curricular == "" && facultad == "" && mes == "" && anio == "" && periodo == ""{
 		panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": helpers.ErrorParametros, "status": "400"})
 	}
-
-		if data, err2:= helpers.GenerarPDF(nombre, proyecto_curricular, facultad, mes, anio, periodo); err2 == nil{
+	if docentes_incumplidos, err:= helpers.CertificacionVistoBueno(dependencia, NumeroMes, anio); err == nil {
+		if data, err2:= helpers.GenerarPDF(nombre, proyecto_curricular, docentes_incumplidos, facultad, mes, anio, periodo); err2 == nil{
 			c.Ctx.Output.SetStatus(200)
 			c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Certificado generado exitosamente.", "Data": data}
 		}else{
 			panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": err2, "status": "400"})
 		}
+	}
 	c.ServeJSON()
 }
 
