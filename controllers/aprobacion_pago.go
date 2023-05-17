@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/udistrital/cumplidos_dve_mid/helpers"
 	"github.com/udistrital/cumplidos_dve_mid/models"
@@ -22,6 +22,7 @@ func (c *AprobacionPagoController) URLMapping(){
 	c.Mapping("AprobarPagos", c.AprobarPagos)
 	c.Mapping("InfoOrdenador", c.InfoOrdenador)
 	c.Mapping("GenerarCertificado", c.GenerarCertificado)
+	c.Mapping("EnviarTitan", c.EnviarTitan)
 }
 
 // AprobacionPagoController ...
@@ -231,6 +232,7 @@ func (c *AprobacionPagoController) GenerarCertificado(){
 
 	if docentes_incumplidos, err:= helpers.CargarCertificacionDocumentosAprobados(facultad, NumeroMes, anio); err == nil{
 		if data, err2:= helpers.GenerarPDFOrdenador(nombre, facultad, dependencia, docentes_incumplidos, mes, anio, periodo); err2 == nil{
+			fmt.Println("DATA:", data)
 			c.Ctx.Output.SetStatus(200)
 			c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Certificado generado exitosamente.", "Data": data}
 		}else{
@@ -240,6 +242,36 @@ func (c *AprobacionPagoController) GenerarCertificado(){
 		panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": err, "status": "400"})
 	}
 	c.ServeJSON()
+}
+
+// AprobacionPagoController ...
+// @Title AprobarPagos
+// @Description create AprobarPagos
+// @Success 201
+// @Failure 403
+// @router /enviar_titan [post]
+func (c *AprobacionPagoController) EnviarTitan(){
+	defer helpers.ErrorController(c.Controller, "AprobacionPagoController")
+
+	if v, e := helpers.ValidarBody(c.Ctx.Input.RequestBody); !v || e !=nil{
+		panic(map[string]interface{}{"funcion": "EnviarTitan", "err": helpers.ErrorBody, "status": "400"})
+	}
+
+	var m models.PagoMensual
+
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &m); err == nil{
+		if res, err2 := helpers.EnviarTitan(m);err2 == nil && res.Id != 0{
+			c.Ctx.Output.SetStatus(200)
+			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "OK", "Data": res}
+		}else{
+			panic(err2)
+		}
+	}else{
+		panic(map[string]interface{}{"funcion": "EnviarTitan", "err": err.Error(), "status": "400"})
+	}
+	c.ServeJSON()
+
+
 }
 // AprobacionPagoController ...
 // @Title AprobarPagos

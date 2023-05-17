@@ -226,7 +226,7 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, docentes_incu
 		fmt.Println("Error al decodificar:", err)
 	}
 
-	//DESCIFRAR FACULTAD
+	//DESCIFRAR NOMBRE
 	Coordinador, err := url.QueryUnescape(nombre)
 	if err != nil {
 		fmt.Println("Error al decodificar:", err)
@@ -267,9 +267,10 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, docentes_incu
 		pdf.ImageOptions(filepath.Join(imgPath, "escudo.png"), 82, 8, 45, 45, false, gofpdf.ImageOptions{ImageType: "PNG", ReadDpi: true}, 0, "")
 		pdf.SetY(65)
 		pdf.SetFont(MinionProBoldCn, "B", fontSize)
-		pdf.WriteAligned(0, lineHeight+1, "EL SUSCRITO COORDINADOR DEL PROYECTO CURRICULAR DE " + proyecto + " DE LA " + Facultad + " DE LA UNIVERSIDAD DISTRITAL FRANCISCO JOSÉ DE CALDAS", "C")
+		pdf.MultiCell(0, lineHeight+1, "EL SUSCRITO COORDINADOR/A DEL PROYECTO CURRICULAR DE " + proyecto + " DE LA " + Facultad + " DE LA UNIVERSIDAD DISTRITAL FRANCISCO JOSÉ DE CALDAS", "", "C", false)
 		pdf.Ln(lineHeight + 2)
 	}, true)
+
 	
 	pdf.AliasNbPages("")
 	pdf.AddPage()
@@ -282,18 +283,18 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, docentes_incu
 	pdf.Ln(lineHeight + 10)
 
 	pdf.SetFont(MinionProBoldCn, "B", fontSize)
-	pdf.WriteAligned(0, lineHeight+1, "CERTIFICA QUE:", "C")
+	pdf.MultiCell(0, lineHeight+1, "CERTIFICA QUE:", "", "C", false)
 	pdf.Ln(lineHeight + 18)
 
 	pdf.SetFont(Calibri, "", fontSize)
 	pdf.MultiCell(0, lineHeight+1, "Los Docentes de Vinculación Especial contratados para el periodo Académico " + periodo + ", del Proyecto Curricular de " + proyecto + " cumplieron a cabalidad con las funciones docentes durante el mes de " + mes + " de " + anio + " (según calendario académico).", "", "J", false)
 	pdf.Ln(lineHeight * 3)
-	
+
 	if docentes_incumplidos != nil{
-		pdf.WriteAligned(0, lineHeight+1, "A excepción de las siguientes novedades: ", "")
+		pdf.MultiCell(0, lineHeight+1, "A excepción de las siguientes novedades: ", "", "J", false)
 		pdf.Ln(lineHeight * 2)
 		for _, docente := range docentes_incumplidos{
-			pdf.WriteAligned(0, lineHeight+1, docente.NumDocumento + " " + docente.Nombre +" " + docente.NumeroContrato + ", no se le aprueba cumplido.", "")
+			pdf.MultiCell(0, lineHeight+1, docente.NumDocumento + " " + docente.Nombre +" " + docente.NumeroContrato + ", no se le aprueba cumplido.", "", "J", false)
 			pdf.Ln(lineHeight * 2)
 			_, h := pdf.GetPageSize()
 			_, _, _, b := pdf.GetMargins()
@@ -302,18 +303,16 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, docentes_incu
 			}
 		}
 	}
-
+	
 	pdf.Ln(lineHeight * 3)
-	pdf.WriteAligned(0, lineHeight+1, "La presente certificación se expide el día " + strconv.Itoa(now.Day()) + " del mes de " + meses[now.Month()] + " de " + strconv.Itoa(now.Year()) + ".", "")
+	pdf.MultiCell(0, lineHeight+1, "La presente certificación se expide el día " + strconv.Itoa(now.Day()) + " del mes de " + meses[now.Month()] + " de " + strconv.Itoa(now.Year()) + ".", "", "J", false)
 	pdf.Ln(lineHeight * 12)
 
 	pdf.SetFont(MinionProBoldCn, "B", fontSize)
-	pdf.WriteAligned(0, lineHeight+1, Coordinador, "C")
-	pdf.Ln(lineHeight)
-	pdf.WriteAligned(0, lineHeight+1, "Coordinador", "C")
-	pdf.Ln(lineHeight)
-	pdf.WriteAligned(0, lineHeight+1, "Proyecto Curricular " + proyecto, "C")
-
+	pdf.MultiCell(0, lineHeight+1, Coordinador, "","C", false)
+	pdf.MultiCell(0, lineHeight+1, "Coordinador/a", "", "C", false)
+	pdf.MultiCell(0, lineHeight+1, "Proyecto Curricular " + proyecto, "", "C", false)
+	
 	return pdf, outputError
 }
 
