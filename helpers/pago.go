@@ -233,7 +233,7 @@ func ObtenerInfoOrdenador(numero_contrato string, vigencia string) (informacion_
 			panic(outputError)
 		}
 	}()
-
+	
 	var temp map[string]interface{}
 	var contrato_elaborado models.ContratoElaborado
 	var ordenadores_gasto []models.OrdenadorGasto
@@ -269,7 +269,6 @@ func ObtenerInfoOrdenador(numero_contrato string, vigencia string) (informacion_
 						panic(err.Error())
 					}
 				}else{
-					fmt.Println(contrato_elaborado.Contrato.OrdenadorGasto)
 					if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", "ordenadores/?query=IdOrdenador:" + contrato_elaborado.Contrato.OrdenadorGasto + "&sortby=FechaInicio&order=desc&limit=1", &ordenadores); err == nil {
 						for _, ordenador := range ordenadores{
 							informacion_ordenador.NumeroDocumento = ordenador.Documento
@@ -434,6 +433,30 @@ func encodePDFOrdenador(pdf *gofpdf.Fpdf) string {
 	return encodedFile
 }
 
+func EnviarTitan(m models.PagoMensual) (resultado models.CumplidoRp, outputError map[string]interface{}){
+	defer func() {
+		if err := recover(); err != nil {
+			outputError = map[string]interface{}{"funcion": "EnviarTitan", "err": err, "status": "500"}
+			panic(outputError)
+		}
+	}()
+	
+	var informacion_rp []models.VinculacionDocente
+	var cumplido_rp models.CumplidoRp
+
+	if  err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?query=NumeroContrato:" + m.NumeroContrato + ",Vigencia:" + strconv.FormatFloat(m.VigenciaContrato, 'f', 0, 64), &informacion_rp); err == nil{
+		if err2 := GetRequestNew("CumplidosDveUrlTitan", "contrato_preliquidacion/cumplido_rp/" + strconv.FormatFloat(m.Ano, 'f', 0, 64) + "/" + strconv.FormatFloat(m.Mes, 'f', 0, 64) + "/" + m.NumeroContrato + "/" + strconv.FormatFloat(informacion_rp[0].VigenciaRp, 'f', 0, 64) + "/" + strconv.FormatFloat(informacion_rp[0].NumeroRp, 'f', 0, 64), &cumplido_rp); err2 == nil {
+			resultado = cumplido_rp
+		}else{
+			panic(err2.Error())
+		}
+	}else{
+		panic(err.Error())
+	}
+
+	return resultado, outputError
+}
+
 func AprobarMultiplesPagos(m []models.PagoMensual) (resultado string, outputError map[string]interface{}){
 	defer func() {
 		if err := recover(); err != nil {
@@ -443,17 +466,31 @@ func AprobarMultiplesPagos(m []models.PagoMensual) (resultado string, outputErro
 	}()
 
 	var response interface{}
+	var informacion_rp []models.VinculacionDocente
+	var cumplido_rp models.CumplidoRp
 	//var pagos_mensuales []*models.PagoMensual
 	//var pago_mensual *models.PagoMensual
 
 	for _, pm := range m {
 		//pago_mensual = pm.PagoMensual
 		//pagos_mensuales = append(pagos_mensuales, pago_mensual)
-		if err := SendRequestNew("CumplidosDveUrlCrud", "pago_mensual/" + strconv.Itoa(pm.Id), "PUT", &response, &pm); err == nil{
-			resultado = "OK"
+		if  err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?query=NumeroContrato:" + pm.NumeroContrato + ",Vigencia:" + strconv.FormatFloat(pm.VigenciaContrato, 'f', 0, 64), &informacion_rp); err == nil{
+			if err2 := GetRequestNew("CumplidosDveUrlTitan", "contrato_preliquidacion/cumplido_rp/" + strconv.FormatFloat(pm.Ano, 'f', 0, 64) + "/" + strconv.FormatFloat(pm.Mes, 'f', 0, 64) + "/" + pm.NumeroContrato + "/" + strconv.FormatFloat(informacion_rp[0].VigenciaRp, 'f', 0, 64) + "/" + strconv.FormatFloat(informacion_rp[0].NumeroRp, 'f', 0, 64), &cumplido_rp); err2 == nil {
+				if cumplido_rp.Id != 0{
+					if err := SendRequestNew("CumplidosDveUrlCrud", "pago_mensual/" + strconv.Itoa(pm.Id), "PUT", &response, &pm); err == nil{
+						resultado = "OK"
+					}else{
+						panic(err.Error())
+					}
+				}else{
+					panic("Error al envíar a titan, no existe el cumplido")
+				}
+			}else{
+				panic(err2.Error())
+			}
 		}else{
 			panic(err.Error())
-		}
+		}	
 	}
 	return resultado, outputError
 }

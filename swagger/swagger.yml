@@ -177,6 +177,17 @@ paths:
           description: ""
         "403":
           description: :docordenador is empty
+  /aprobacion_pago/enviar_titan:
+    post:
+      tags:
+      - aprobacion_pago
+      description: create AprobarPagos
+      operationId: AprobacionPagoController.AprobarPagos
+      responses:
+        "201":
+          description: ""
+        "403":
+          description: ""
   /aprobacion_pago/generar_certificado/{nombre}/{facultad}/{dependencia}/{mes}/{anio}/{periodo}:
     get:
       tags:
