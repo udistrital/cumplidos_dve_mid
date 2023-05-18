@@ -74,7 +74,7 @@ func CargarContratosDocente(numDocumento int) (contratosDocentes []models.Contra
 	//CONSULTA LA INFORMACION DE PROVEEDOR
 	if err = GetRequestLegacy("CumplidosDveUrlCrudAgora", "informacion_proveedor/?query=num_documento:" + strconv.Itoa(numDocumento), &proveedor); err == nil {
 		//CONSULTA LA VINCULACION DEL DOCENTE
-		if err = GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?query=PersonaId:" + strconv.Itoa(numDocumento), &vinculaciones); err == nil {
+		if err = GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?query=PersonaId:" + strconv.Itoa(numDocumento) + "&limit=-1", &vinculaciones); err == nil {
 			for _, vinculacion := range vinculaciones {
 				if err = GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=Id:" + strconv.FormatInt(vinculacion.DedicacionId, 10), &parametro); err == nil {
 					//CONSULTA LA DEPENDENCIA DE CADA VINCULACION
