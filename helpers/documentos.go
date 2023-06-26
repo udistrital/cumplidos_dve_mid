@@ -130,6 +130,7 @@ func CertificacionVistoBueno(dependencia string, mes string, anio string) (perso
 	var mes_cer, _ = strconv.Atoi(mes)
 	var anio_cer, _ = strconv.Atoi(anio)
 	var resultado = false
+	var imprimido = false
 
 	if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=ProyectoCurricularId:" + dependencia, &vinculaciones_docente); err == nil{
 		for _, vinculacion_docente := range vinculaciones_docente {
@@ -141,9 +142,10 @@ func CertificacionVistoBueno(dependencia string, mes string, anio string) (perso
 							(actaInicio.FechaInicio.Year() < actaInicio.FechaFin.Year() && int(actaInicio.FechaInicio.Month()) >= mes_cer && actaInicio.FechaInicio.Year() < anio_cer && int(actaInicio.FechaFin.Month()) >= mes_cer && actaInicio.FechaFin.Year() >= anio_cer){
 								if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion.in:PAD_DVE|AD_DVE|AP_DVE", &parametros); err == nil{
 									for _, parametro := range parametros{
-										if resultado == false{
+										if resultado == false && imprimido == false{
 											if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?query=EstadoPagoMensualId:" + strconv.Itoa(parametro.Id) + ",NumeroContrato:" + vinculacion_docente.NumeroContrato + ",VigenciaContrato:" + strconv.FormatInt(vinculacion_docente.Vigencia, 10) + ",Mes:" + mes + ",Ano:" + anio,  &pagos_mensuales); err == nil{
-												if pagos_mensuales == nil {
+												if len((pagos_mensuales)) == 0 {
+													imprimido = true
 													if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", "informacion_proveedor/?query=NumDocumento:" + strconv.Itoa(vinculacion_docente.PersonaId), &contratistas); err == nil{
 														for  _, contratista := range contratistas{
 															persona.NumDocumento = contratista.NumDocumento
@@ -155,6 +157,7 @@ func CertificacionVistoBueno(dependencia string, mes string, anio string) (perso
 													}else{
 														panic(err.Error())
 													}
+												}else{
 													resultado = true
 												}
 											}else{
@@ -163,6 +166,7 @@ func CertificacionVistoBueno(dependencia string, mes string, anio string) (perso
 										}	
 									}
 									resultado = false
+									imprimido = false
 								}
 						}
 					}
