@@ -8,9 +8,8 @@
 package routers
 
 import (
-	"github.com/udistrital/cumplidos_dve_mid/controllers"
-
 	"github.com/astaxie/beego"
+	"github.com/udistrital/cumplidos_dve_mid/controllers"
 )
 
 func init() {
