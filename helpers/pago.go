@@ -24,7 +24,7 @@ func CargarCertificacionDocumentosAprobados(dependencia string, mes string, anio
 			panic(outputError)
 		}
 	}()
-
+	
 	var contrato_ordenador_dependencia models.ContratoOrdenadorDependencia
 	var pagos_mensuales []models.PagoMensual
 	var persona models.Persona
@@ -37,14 +37,13 @@ func CargarCertificacionDocumentosAprobados(dependencia string, mes string, anio
 	}
 
 	contrato_ordenador_dependencia = GetContratosOrdenadorDependencia(dependencia, anio+"-"+mes, anio+"-"+mes)
-
-	for _, contrato := range contrato_ordenador_dependencia.ContratosOrdenadorDependencia.InformacionContratos {
-		if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=NumeroContrato:"+contrato.NumeroContrato+",Vigencia:"+contrato.Vigencia, &vinculaciones_docente); err == nil {
-			for _, vinculacion_docente := range vinculaciones_docente {
+	for _, contrato := range contrato_ordenador_dependencia.ContratosOrdenadorDependencia.InformacionContratos{
+		if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=NumeroContrato:" + contrato.NumeroContrato + ",Vigencia:" + contrato.Vigencia, &vinculaciones_docente); err == nil{
+			for _, vinculacion_docente := range vinculaciones_docente{
 				if vinculacion_docente.NumeroContrato != "" {
-					if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:AP_DVE", &parametro); err == nil {
-						if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?query=EstadoPagoMensualId:"+strconv.Itoa(parametro[0].Id)+",NumeroContrato:"+contrato.NumeroContrato+",VigenciaContrato:"+contrato.Vigencia+",Mes:"+strconv.Itoa(mes_cer)+",Ano:"+anio, &pagos_mensuales); err == nil {
-							if pagos_mensuales == nil {
+					if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:AP_DVE", &parametro); err == nil{
+						if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?query=EstadoPagoMensualId:" + strconv.Itoa(parametro[0].Id) + ",NumeroContrato:" + contrato.NumeroContrato + ",VigenciaContrato:" + contrato.Vigencia + ",Mes:" + strconv.Itoa(mes_cer) + ",Ano:" + anio, &pagos_mensuales); err == nil{
+							if len((pagos_mensuales)) == 0 {
 								persona.NumDocumento = contrato.Documento
 								persona.Nombre = contrato.NombreContratista
 								persona.NumeroContrato = contrato.NumeroContrato
