@@ -515,6 +515,12 @@
             }
         }
     },
+    "definitions": {
+        "models.ContratosDocentes": {
+            "title": "ContratosDocentes",
+            "type": "object"
+        }
+    },
     "tags": [
         {
             "name": "informacion_academica",
