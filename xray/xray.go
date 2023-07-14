@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/astaxie/beego"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecr"
 	"github.com/aws/aws-sdk-go/service/ecs"
@@ -30,9 +29,9 @@ func InitXRay() error {
 	//xray.SetLogger(xraylog.NewDefaultLogger(os.Stderr, xraylog.LogLevelError))
 	xray.Configure(xray.Config{
 		//DaemonAddr: "127.0.0.1:2000", // Dirección y puerto del demonio de X-Ray local
-		DaemonAddr: beego.AppConfig.String("CumplidosDveUrlXray"),
-		LogLevel:   "info", // Nivel de log deseado
-		LogFormat:  "json", // Formato de log deseado (text o json)
+		//DaemonAddr: beego.AppConfig.String("CumplidosDveUrlXray"),
+		LogLevel:  "info", // Nivel de log deseado
+		LogFormat: "json", // Formato de log deseado (text o json)
 	})
 
 	// S3 and ECS Clients
