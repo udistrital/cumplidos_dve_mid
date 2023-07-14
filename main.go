@@ -1,16 +1,19 @@
 package main
 
 import (
-	_ "github.com/udistrital/cumplidos_dve_mid/routers"
-	  "github.com/astaxie/beego/plugins/cors"
-	  apistatus "github.com/udistrital/utils_oas/apiStatusLib"
-	  auditoria "github.com/udistrital/utils_oas/auditoria"
-	  "github.com/udistrital/utils_oas/customerrorv2"
-
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/plugins/cors"
+	_ "github.com/udistrital/cumplidos_dve_mid/routers"
+	xray "github.com/udistrital/cumplidos_dve_mid/xray"
+	apistatus "github.com/udistrital/utils_oas/apiStatusLib"
+	auditoria "github.com/udistrital/utils_oas/auditoria"
+	"github.com/udistrital/utils_oas/customerrorv2"
 )
 
 func main() {
+
+	// Inicializar el SDK de X-Ray
+
 	AllowedOrigins := []string{"*.udistrital.edu.co"}
 	if beego.BConfig.RunMode == "dev" {
 		AllowedOrigins = []string{"*"}
@@ -29,6 +32,8 @@ func main() {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
+
+	xray.InitXRay()
 	beego.ErrorController(&customerrorv2.CustomErrorController{})
 	apistatus.Init()
 	auditoria.InitMiddleware()
