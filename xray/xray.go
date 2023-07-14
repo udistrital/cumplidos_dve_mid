@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecr"
 	"github.com/aws/aws-sdk-go/service/ecs"
-	ecs2 "github.com/aws/aws-xray-sdk-go/awsplugins/ecs"
 	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/sirupsen/logrus"
 )
@@ -30,16 +29,16 @@ func InitXRay() error {
 	//xray.SetLogger(xraylog.NewDefaultLogger(os.Stderr, xraylog.LogLevelError))
 	xray.Configure(xray.Config{
 		//DaemonAddr: "127.0.0.1:2000", // Dirección y puerto del demonio de X-Ray local
-		DaemonAddr: "",
-		LogLevel:   "info", // Nivel de log deseado
-		LogFormat:  "json", // Formato de log deseado (text o json)
+		//DaemonAddr: "",
+		LogLevel:  "info", // Nivel de log deseado
+		LogFormat: "json", // Formato de log deseado (text o json)
 	})
 
 	// S3 and ECS Clients
 	ecrClient := ecr.New(XraySess)
 	ecsClient := ecs.New(XraySess)
 
-	ecs2.Init()
+	//ecs2.Init()
 
 	// XRay Setup
 	xray.AWS(ecrClient.Client)
