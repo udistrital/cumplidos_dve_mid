@@ -121,7 +121,6 @@ func CertificacionVistoBueno(dependencia string, mes string, anio string) (perso
 			panic(outputError)
 		}
 	}()
-
 	var parametros []models.Parametro
 	var vinculaciones_docente []models.VinculacionDocente
 	var pagos_mensuales []models.PagoMensual
@@ -161,21 +160,19 @@ func CertificacionVistoBueno(dependencia string, mes string, anio string) (perso
 											} else {
 												resultado = true
 											}
-											resultado = true
+										} else {
+											panic(err.Error())
 										}
-									} else {
-										panic(err.Error())
 									}
 								}
 								resultado = false
 								imprimido = false
 							}
-							resultado = false
 						}
 					}
+				} else {
+					panic(err.Error())
 				}
-			} else {
-				panic(err.Error())
 			}
 		}
 	} else {
