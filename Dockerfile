@@ -1,5 +1,5 @@
-FROM python:2.7
-RUN pip install awscli
+FROM python:3
+RUN pip3 install awscli --no-build-isolation
 WORKDIR /
 COPY entrypoint.sh entrypoint.sh
 COPY main main
