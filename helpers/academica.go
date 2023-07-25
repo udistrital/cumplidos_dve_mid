@@ -26,7 +26,7 @@ func CargarInformacionCoordinador(DependenciaOikosId int) (info_coordinador mode
 			var temp_homologacion models.ObjetoProyectoCurricular
 			if err = json.Unmarshal(json_proyecto_curricular, &temp_homologacion); err == nil {
 				id_proyecto_snies := temp_homologacion.Homologacion.IDSnies
-				if err = GetJsonWSO2(beego.AppConfig.String("CumplidosDveUrlWso2")+"servicios_academicos"+"/"+"carrera_snies/"+id_proyecto_snies, &temp_snies); err == nil && temp_snies != nil {
+				if err = GetJsonWSO2(beego.AppConfig.String("CumplidosDveUrlWso2")+beego.AppConfig.String("CumplidosDveAcademica")+"/"+"carrera_snies/"+id_proyecto_snies, &temp_snies); err == nil && temp_snies != nil {
 					json_info_coordinador, error_json := json.Marshal(temp_snies)
 					if error_json == nil {
 						var temp_info_coordinador models.InformacionCoordinador
