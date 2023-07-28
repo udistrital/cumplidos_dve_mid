@@ -40,6 +40,7 @@ func InitXRay() error {
 
 	//ecs2.Init()
 
+	
 	// XRay Setup
 	xray.AWS(ecrClient.Client)
 	xray.AWS(ecsClient.Client)
