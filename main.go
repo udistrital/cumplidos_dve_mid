@@ -4,10 +4,10 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/plugins/cors"
 	_ "github.com/udistrital/cumplidos_dve_mid/routers"
-	xray "github.com/udistrital/cumplidos_dve_mid/xray"
 	apistatus "github.com/udistrital/utils_oas/apiStatusLib"
 	auditoria "github.com/udistrital/utils_oas/auditoria"
 	"github.com/udistrital/utils_oas/customerrorv2"
+	"github.com/udistrital/utils_oas/xray"
 )
 
 func main() {
@@ -33,9 +33,10 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	xray.InitXRay()
+	xray.InitXRay("Cumplidos_DVE_MID")
 	beego.ErrorController(&customerrorv2.CustomErrorController{})
 	apistatus.Init()
 	auditoria.InitMiddleware()
+
 	beego.Run()
 }
