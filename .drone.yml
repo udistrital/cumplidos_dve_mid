@@ -51,7 +51,7 @@ steps:
     - push
 
 - name: go_build
-  image: golang:1.15
+  image: golang:1.16
   commands:
   # - go mod init
   - go get -t
