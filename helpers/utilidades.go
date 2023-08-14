@@ -260,7 +260,7 @@ func diff(a, b time.Time) (year, month, day int) {
 	// Normalize negative values
 
 	if day < 0 {
-		// days in month:
+		// days in month: p
 		t := time.Date(y1, M1, 32, 0, 0, 0, 0, time.UTC)
 		day += 32 - t.Day()
 		month--
