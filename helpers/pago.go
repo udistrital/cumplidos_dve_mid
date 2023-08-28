@@ -271,15 +271,7 @@ func ObtenerInfoOrdenador(numero_contrato string, vigencia string) (informacion_
 						panic(err.Error())
 					}
 				} else {
-					if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", "ordenadores/?query=IdOrdenador:"+contrato_elaborado.Contrato.OrdenadorGasto+"&sortby=FechaInicio&order=desc&limit=1", &ordenadores); err == nil {
-						for _, ordenador := range ordenadores {
-							informacion_ordenador.NumeroDocumento = ordenador.Documento
-							informacion_ordenador.Cargo = ordenador.RolOrdenador
-							informacion_ordenador.Nombre = ordenador.NombreOrdenador
-						}
-					} else {
-						panic(err.Error())
-					}
+					panic(err.Error())
 				}
 			} else {
 				panic(err.Error())
