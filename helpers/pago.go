@@ -37,30 +37,34 @@ func CargarCertificacionDocumentosAprobados(dependencia string, mes string, anio
 	}
 
 	contrato_ordenador_dependencia = GetContratosOrdenadorDependencia(dependencia, anio+"-"+mes, anio+"-"+mes)
-
-	for _, contrato := range contrato_ordenador_dependencia.ContratosOrdenadorDependencia.InformacionContratos {
-		if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=NumeroContrato:"+contrato.NumeroContrato+",Vigencia:"+contrato.Vigencia, &vinculaciones_docente); err == nil {
-			for _, vinculacion_docente := range vinculaciones_docente {
-				if vinculacion_docente.NumeroContrato != "" {
-					if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:AP_DVE", &parametro); err == nil {
-						if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?query=EstadoPagoMensualId:"+strconv.Itoa(parametro[0].Id)+",NumeroContrato:"+contrato.NumeroContrato+",VigenciaContrato:"+contrato.Vigencia+",Mes:"+strconv.Itoa(mes_cer)+",Ano:"+anio, &pagos_mensuales); err == nil {
-							if pagos_mensuales == nil {
-								persona.NumDocumento = contrato.Documento
-								persona.Nombre = contrato.NombreContratista
-								persona.NumeroContrato = contrato.NumeroContrato
-								persona.Vigencia, _ = strconv.Atoi(contrato.Vigencia)
-								personas = append(personas, persona)
+	if len(contrato_ordenador_dependencia.ContratosOrdenadorDependencia.InformacionContratos) != 0 {
+		for _, contrato := range contrato_ordenador_dependencia.ContratosOrdenadorDependencia.InformacionContratos {
+			if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=NumeroContrato:"+contrato.NumeroContrato+",Vigencia:"+contrato.Vigencia, &vinculaciones_docente); err == nil {
+				for _, vinculacion_docente := range vinculaciones_docente {
+					if vinculacion_docente.NumeroContrato != "" {
+						if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:AP_DVE", &parametro); err == nil {
+							if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?query=EstadoPagoMensualId:"+strconv.Itoa(parametro[0].Id)+",NumeroContrato:"+contrato.NumeroContrato+",VigenciaContrato:"+contrato.Vigencia+",Mes:"+strconv.Itoa(mes_cer)+",Ano:"+anio, &pagos_mensuales); err == nil {
+								if len((pagos_mensuales)) == 0 {
+									persona.NumDocumento = contrato.Documento
+									persona.Nombre = contrato.NombreContratista
+									persona.NumeroContrato = contrato.NumeroContrato
+									persona.Vigencia, _ = strconv.Atoi(contrato.Vigencia)
+									personas = append(personas, persona)
+								}
+							} else {
+								panic(err.Error())
 							}
-						} else {
-							panic(err.Error())
 						}
 					}
 				}
+			} else {
+				panic(err.Error())
 			}
-		} else {
-			panic(err.Error())
 		}
+	} else {
+		panic("EL ORDENADOR NO TIENE CONTRATOS ASOCIADOS A LA DEPENDENCIA")
 	}
+
 	return personas, outputError
 }
 
@@ -237,7 +241,7 @@ func ObtenerInfoOrdenador(numero_contrato string, vigencia string) (informacion_
 	var ordenadores_gasto []models.OrdenadorGasto
 	var jefes_dependencia []models.JefeDependencia
 	var informacion_proveedores []models.InformacionProveedor
-	var ordenadores []models.Ordenador
+	//var ordenadores []models.Ordenador
 
 	if err := GetJsonWSO2(beego.AppConfig.String("CumplidosDveUrlWso2")+beego.AppConfig.String("CumplidosDveAdministrativa")+"/"+"contrato_elaborado/"+numero_contrato+"/"+vigencia, &temp); err == nil && temp != nil {
 		json_contrato_elaborado, error_json := json.Marshal(temp)

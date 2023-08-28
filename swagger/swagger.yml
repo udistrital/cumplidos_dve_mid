@@ -308,6 +308,27 @@ paths:
           description: ""
         "403":
           description: :docordenador is empty
+  /informacion_academica/contratos_docente/{numDocumento}:
+    get:
+      tags:
+      - informacion_academica
+      description: create GetContratosDocente
+      operationId: InformacionAcademicaController.GetContratosDocente
+      parameters:
+      - in: query
+        name: numDocumento
+        description: Docente a consultar
+        required: true
+        type: string
+      responses:
+        "201":
+          description: ""
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/models.ContratosDocentes'
+        "403":
+          description: body is empty
   /informacion_academica/informacion_coordinador/{id_dependencia_oikos}:
     get:
       tags:
@@ -328,6 +349,10 @@ paths:
           description: Bad Request
         "403":
           description: :id_dependencia_oikos is empty
+definitions:
+  models.ContratosDocentes:
+    title: ContratosDocentes
+    type: object
 tags:
 - name: informacion_academica
   description: |
