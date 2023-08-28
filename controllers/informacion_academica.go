@@ -38,11 +38,10 @@ func (c *InformacionAcademicaController) ObtenerInfoCoordinador() {
 
 	if data, err3 := helpers.CargarInformacionCoordinador(id); err3 == nil && data.CarreraSniesCollection.CarreraSnies != nil {
 		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Información del coordinador cargada con exito", "Data": data}
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Información del coordinador cargada con exito", "Data": data}
 	} else {
 		panic(map[string]interface{}{"funcion": "ObtenerInfoCoordinador", "err": err3, "status": "400"})
 	}
-
 	c.ServeJSON()
 }
 
@@ -66,7 +65,7 @@ func (c *InformacionAcademicaController) GetContratosDocente() {
 
 	if data, err2 := helpers.CargarContratosDocente(doc); err2 == nil {
 		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Contratos del Docente cargados con exito", "Data": data}
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Contratos del Docente cargados con exito", "Data": data}
 	} else {
 		panic(map[string]interface{}{"funcion": "GetContratosDocente", "err": err2, "status": "400"})
 	}
