@@ -174,12 +174,10 @@ func ObtenerDependenciaOrdenador(doc_ordenador string) (resultado int, outputErr
 					resultado = ordenador.DependenciaId
 				}
 			} else {
-				fmt.Println("Error 1")
 				panic(err.Error())
 			}
 		}
 	} else {
-		fmt.Println("Error 2")
 		panic(err.Error())
 	}
 	return resultado, outputError
