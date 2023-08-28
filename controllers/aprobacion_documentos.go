@@ -39,7 +39,7 @@ func (c *AprobacionDocumentosController) SolicitudesSupervisor() {
 
 	if data, err2 := helpers.GetSolicitudesSupervisor(doc_supervisor); err2 == nil {
 		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Solicitudes del supervisor cargadas con exito", "Data": data}
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Solicitudes del supervisor cargadas con exito", "Data": data}
 	} else {
 		panic(map[string]interface{}{"funcion": "SolicitudesSupervisor", "err": err2, "status": "400"})
 	}
@@ -65,7 +65,7 @@ func (c *AprobacionDocumentosController) SolicitudesCoordinador() {
 
 	if data, err2 := helpers.GetSolicitudesCoordinador(doc_coordinador); err2 == nil {
 		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Solicitudes del coordinador cargadas con exito", "Data": data}
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Solicitudes del coordinador cargadas con exito", "Data": data}
 	} else {
 		panic(map[string]interface{}{"funcion": "SolicitudesCoordinador", "err": err2, "status": "400"})
 	}
@@ -97,7 +97,7 @@ func (c *AprobacionDocumentosController) CertificacionVistoBueno() {
 
 	if data, err2 := helpers.CertificacionVistoBueno(dependencia, mes, anio); err2 == nil {
 		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Certificaciones de visto bueno cargadas con exito", "Data": data}
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Certificaciones de visto bueno cargadas con exito", "Data": data}
 	} else {
 		panic(map[string]interface{}{"funcion": "CertificacionVistoBueno", "err": err2, "status": "400"})
 	}
@@ -164,7 +164,7 @@ func (c *AprobacionDocumentosController) GenerarCertificado() {
 	if docentes_incumplidos, err := helpers.CertificacionVistoBueno(dependencia, NumeroMes, anio); err == nil {
 		if data, err2 := helpers.GenerarPDF(nombre, proyecto_curricular, docentes_incumplidos, facultad, mes, anio, periodo); err2 == nil {
 			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Certificado generado exitosamente.", "Data": data}
+			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Certificado generado exitosamente.", "Data": data}
 		} else {
 			panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": err2, "status": "400"})
 		}

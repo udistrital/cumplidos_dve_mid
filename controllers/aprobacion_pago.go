@@ -49,7 +49,7 @@ func (c *AprobacionPagoController) CertificacionDocumentosAprobados() {
 
 	if data, err2 := helpers.CargarCertificacionDocumentosAprobados(dependencia, mes, anio); err2 == nil {
 		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Certificación documentos aprobados cargada con exito", "Data": data}
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Certificación documentos aprobados cargada con exito", "Data": data}
 	} else {
 		panic(map[string]interface{}{"funcion": "CertificacionDocumentosAprobados", "err": err2, "status": "400"})
 	}
@@ -83,7 +83,7 @@ func (c *AprobacionPagoController) PagoAprobado() {
 	}
 
 	if data, err2 := helpers.ConsultarPagoAprobado(numero_contrato, vigencia, mes, anio); err2 == nil {
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Estado del pago cargado con exito", "Data": data}
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Estado del pago cargado con exito", "Data": data}
 	} else {
 		panic(map[string]interface{}{"funcion": "PagoAprobado", "err": err2, "status": "400"})
 	}
@@ -111,7 +111,7 @@ func (c *AprobacionPagoController) SolicitudesOrdenador() {
 
 	if data, err2 := helpers.CargarSolicitudesOrdenador(doc_ordenador, limit, offset, err0); err2 == nil {
 		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Solicitudes del ordenador cargadas con exito", "Data": data}
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Solicitudes del ordenador cargadas con exito", "Data": data}
 	} else {
 		panic(map[string]interface{}{"funcion": "SolicitudesOrdenador", "err": err2, "status": "400"})
 	}
@@ -137,7 +137,7 @@ func (c *AprobacionPagoController) DependenciaOrdenador() {
 
 	if data, err2 := helpers.ObtenerDependenciaOrdenador(doc_ordenador); err2 == nil && data != 0 {
 		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Dependencia del ordenador cargadas con exito", "Data": data}
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Dependencia del ordenador cargadas con exito", "Data": data}
 	} else {
 		panic(map[string]interface{}{"funcion": "DependenciaOrdenador", "err": err2, "status": "400"})
 	}
@@ -166,11 +166,10 @@ func (c *AprobacionPagoController) InfoOrdenador() {
 
 	if data, err2 := helpers.ObtenerInfoOrdenador(numero_contrato, vigencia); err2 == nil && data.NumeroDocumento != 0 {
 		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Informacion ordenador cargada con exito", "Data": data}
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Informacion ordenador cargada con exito", "Data": data}
 	} else {
 		panic(map[string]interface{}{"funcion": "InfoOrdenador", "err": err2, "status": "400"})
 	}
-
 	c.ServeJSON()
 }
 
@@ -237,7 +236,7 @@ func (c *AprobacionPagoController) GenerarCertificado() {
 	if docentes_incumplidos, err := helpers.CargarCertificacionDocumentosAprobados(facultad, NumeroMes, anio); err == nil {
 		if data, err2 := helpers.GenerarPDFOrdenador(nombre, facultad, dependencia, docentes_incumplidos, mes, anio, periodo); err2 == nil {
 			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = map[string]interface{}{"Success": true, "Status": 200, "Message": "Certificado generado exitosamente.", "Data": data}
+			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Certificado generado exitosamente.", "Data": data}
 		} else {
 			panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": err2, "status": "400"})
 		}

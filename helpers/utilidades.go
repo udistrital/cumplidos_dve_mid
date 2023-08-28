@@ -47,7 +47,7 @@ func SendRequestNew(endpoint string, route string, trequest string, target inter
 	var response map[string]interface{}
 	var err error
 	err = SendJson(url, trequest, &response, &datajson)
-	err = ExtractData(response, target)
+	err = ExtractData(response, target, err)
 	return err
 }
 
@@ -66,26 +66,23 @@ func GetRequestNew(endpoint string, route string, target interface{}) error {
 	var response map[string]interface{}
 	var err error
 	err = GetJson(url, &response)
-	err = ExtractData(response, &target)
+	err = ExtractData(response, &target, err)
 	return err
 }
 
 // Envia una petición a endponts que responden con el body sin encapsular
 func GetRequestLegacy(endpoint string, route string, target interface{}) error {
 	url := beego.AppConfig.String("ProtocolAdmin") + beego.AppConfig.String(endpoint) + route
-
 	if err := GetJson(url, target); err != nil {
 		return err
 	}
-
 	return nil
 }
 
 func GetRequestWSO2(service string, route string, target interface{}) error {
 	url := beego.AppConfig.String("ProtocolAdmin") +
-		beego.AppConfig.String("UrlcrudWSO2") +
+		beego.AppConfig.String("CumplidosDveUrlWso2") +
 		beego.AppConfig.String(service) + "/" + route
-
 	if response, err := GetJsonWSO2Test(url, &target); response == 200 && err == nil {
 		return nil
 	} else {
@@ -95,8 +92,12 @@ func GetRequestWSO2(service string, route string, target interface{}) error {
 
 // Esta función extrae la información cuando se recibe encapsulada en una estructura
 // y da manejo a las respuestas que contienen arreglos de objetos vacíos
-func ExtractData(respuesta map[string]interface{}, v interface{}) error {
+func ExtractData(respuesta map[string]interface{}, v interface{}, err2 error) error {
 	var err error
+
+	if err2 != nil {
+		return err2
+	}
 	if respuesta["Success"] == false {
 		err = errors.New(respuesta["Message"].(string))
 		panic(err)
@@ -132,10 +133,12 @@ func SendJson(url string, trequest string, target interface{}, datajson interfac
 	req.Header.Set("Accept", AppJson)
 	req.Header.Add("Content-Type", AppJson)
 	resp, err := xray.Client(http.DefaultClient).Do(req)
-	xray2.SetStatusCode(resp.StatusCode)
 	if err != nil {
 		beego.Error("error", err)
+		xray2.ErrorController5xx(trequest, url, err)
 		return err
+	} else {
+		xray2.UpdateState(trequest, url, resp.StatusCode, err)
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
@@ -150,9 +153,11 @@ func GetJsonTest(url string, target interface{}) (status int, err error) {
 
 	req, err := http.NewRequestWithContext(xray2.GetContext(), "GET", url, nil)
 	resp, err := xray.Client(http.DefaultClient).Do(req)
-	xray2.SetStatusCode(resp.StatusCode)
 	if err != nil {
+		xray2.ErrorController5xx("GET", url, err)
 		return resp.StatusCode, err
+	} else {
+		xray2.UpdateState("GET", url, resp.StatusCode, err)
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
@@ -164,15 +169,16 @@ func GetJsonTest(url string, target interface{}) (status int, err error) {
 }
 
 func GetJson(url string, target interface{}) error {
-
 	//Request
 	req, err := http.NewRequestWithContext(xray2.GetContext(), "GET", url, nil)
 	resp, err := xray.Client(http.DefaultClient).Do(req)
-	xray2.SetStatusCode(resp.StatusCode)
-	if err != nil {
-		return err
-	}
 
+	if err != nil {
+		xray2.ErrorController5xx("GET", url, err)
+		return err
+	} else {
+		xray2.UpdateState("GET", url, resp.StatusCode, err)
+	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
 			beego.Error(err)
@@ -186,9 +192,11 @@ func GetXml(url string, target interface{}) error {
 
 	req, err := http.NewRequestWithContext(xray2.GetContext(), "GET", url, nil)
 	resp, err := xray.Client(http.DefaultClient).Do(req)
-	xray2.SetStatusCode(resp.StatusCode)
 	if err != nil {
+		xray2.ErrorController5xx("GET", url, err)
 		return err
+	} else {
+		xray2.UpdateState("GET", url, resp.StatusCode, err)
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
@@ -200,15 +208,16 @@ func GetXml(url string, target interface{}) error {
 }
 
 func GetJsonWSO2(urlp string, target interface{}) error {
-
 	b := new(bytes.Buffer)
 	req, err := http.NewRequestWithContext(xray2.GetContext(), "GET", urlp, b)
 	req.Header.Set("Accept", AppJson)
 	resp, err := xray.Client(http.DefaultClient).Do(req)
-	xray2.SetStatusCode(resp.StatusCode)
 	if err != nil {
 		beego.Error("error", err)
+		xray2.ErrorController5xx("GET", urlp, err)
 		return err
+	} else {
+		xray2.UpdateState("GET", urlp, resp.StatusCode, err)
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
@@ -222,14 +231,15 @@ func GetJsonWSO2(urlp string, target interface{}) error {
 func GetJsonWSO2Test(urlp string, target interface{}) (status int, err error) {
 
 	b := new(bytes.Buffer)
-
 	req, err := http.NewRequestWithContext(xray2.GetContext(), "GET", urlp, b)
 	req.Header.Set("Accept", AppJson)
 	resp, err := xray.Client(http.DefaultClient).Do(req)
-	xray2.SetStatusCode(resp.StatusCode)
 	if err != nil {
 		beego.Error("error", err)
+		xray2.ErrorController5xx("GET", urlp, err)
 		return resp.StatusCode, err
+	} else {
+		xray2.UpdateState("GET", urlp, resp.StatusCode, err)
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
@@ -408,10 +418,12 @@ func ErrorController(c beego.Controller, controller string) {
 		localError := err.(map[string]interface{})
 		c.Data["mesaage"] = (beego.AppConfig.String("appname") + "/" + controller + "/" + (localError["funcion"]).(string))
 		c.Data["data"] = (localError["err"])
-		xray2.EndSegmentErr(c.Ctx.Request.Method, c.Ctx.Request.URL.String())
+		xray2.EvaluateState(http.StatusBadRequest)
+		xray2.EndSegmentErr(c.Ctx.Request.Method, c.Ctx.Request.URL.String(), localError["err"])
 		if status, ok := localError["status"]; ok {
 			c.Abort(status.(string))
 		} else {
+			xray2.Seg.AddError(fmt.Errorf("%v", err))
 			c.Abort("500")
 		}
 	}

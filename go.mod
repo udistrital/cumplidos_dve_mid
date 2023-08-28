@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-xray-sdk-go v1.8.1
 	github.com/phpdave11/gofpdf v1.4.2
 	github.com/smartystreets/goconvey v1.8.1
-	github.com/udistrital/utils_oas v0.0.0-20230814191414-d332dbd3397c
+	github.com/udistrital/utils_oas v0.0.0-20230828220102-692e527e7ecd
 )
 
 require (
