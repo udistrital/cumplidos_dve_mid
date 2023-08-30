@@ -9,10 +9,10 @@ type CumplidoRp struct {
 	ResponsableIva       bool
 	Dependientes         bool
 	Pensionado           bool
-	InteresesVivienda    int
+	InteresesVivienda    float64
 	MedicinaPrepagadaUvt float64
-	PensionVoluntaria    int
-	Afc                  int
+	PensionVoluntaria    float64
+	Afc                  float64
 	Activo               bool
 	FechaCreacion        string
 	FechaModificacion    string
