@@ -243,6 +243,8 @@ func ObtenerInfoOrdenador(numero_contrato string, vigencia string) (informacion_
 	var ordenadores_gasto []models.OrdenadorGasto
 	var jefes_dependencia []models.JefeDependencia
 	var informacion_proveedores []models.InformacionProveedor
+	fecha_actual := time.Now()
+	fecha := fecha_actual.Format("2006-01-02")
 	//var ordenadores []models.Ordenador
 
 	if err := GetJsonWSO2(beego.AppConfig.String("CumplidosDveUrlWso2")+beego.AppConfig.String("CumplidosDveAdministrativa")+"/"+"contrato_elaborado/"+numero_contrato+"/"+vigencia, &temp); err == nil && temp != nil {
@@ -252,7 +254,7 @@ func ObtenerInfoOrdenador(numero_contrato string, vigencia string) (informacion_
 				if contrato_elaborado.Contrato.TipoContrato == "2" || contrato_elaborado.Contrato.TipoContrato == "3" || contrato_elaborado.Contrato.TipoContrato == "18" {
 					if err := GetRequestLegacy("CumplidosDveUrlCore", "ordenador_gasto/?query=Id:"+contrato_elaborado.Contrato.OrdenadorGasto, &ordenadores_gasto); err == nil {
 						for _, ordenador_gasto := range ordenadores_gasto {
-							if err := GetRequestLegacy("CumplidosDveUrlCore", "jefe_dependencia/?query=DependenciaId:"+strconv.Itoa(ordenador_gasto.DependenciaId)+"&sortby=FechaInicio&order=desc&limit=1", &jefes_dependencia); err == nil {
+							if err := GetRequestLegacy("CumplidosDveUrlCore", "jefe_dependencia/?query=DependenciaId:"+strconv.Itoa(ordenador_gasto.DependenciaId)+",FechaFin__gte:"+fecha+",FechaInicio__lte:"+fecha, &jefes_dependencia); err == nil {
 								for _, jefe_dependencia := range jefes_dependencia {
 									if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", "informacion_proveedor/?query=NumDocumento:"+strconv.Itoa(jefe_dependencia.TerceroId), &informacion_proveedores); err == nil {
 										for _, informacion_proveedor := range informacion_proveedores {
