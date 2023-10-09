@@ -166,8 +166,10 @@ func ObtenerDependenciaOrdenador(doc_ordenador string) (resultado int, outputErr
 
 	var ordenadores_gasto []models.OrdenadorGasto
 	var jefes_dependencia []models.JefeDependencia
+	fecha_actual := time.Now()
+	fecha := fecha_actual.Format("2006-01-02")
 
-	if err := GetRequestLegacy("CumplidosDveUrlCore", "jefe_dependencia/?query=TerceroId:"+doc_ordenador+"&sortby=FechaFin&order=desc&limit=1", &jefes_dependencia); err == nil {
+	if err := GetRequestLegacy("CumplidosDveUrlCore", "jefe_dependencia/?query=TerceroId:"+doc_ordenador+",FechaFin__gte:"+fecha+",FechaInicio__lte:"+fecha, &jefes_dependencia); err == nil {
 		for _, jefe := range jefes_dependencia {
 			if err := GetRequestLegacy("CumplidosDveUrlCore", "ordenador_gasto/?query=DependenciaId:"+strconv.Itoa(jefe.DependenciaId), &ordenadores_gasto); err == nil {
 				for _, ordenador := range ordenadores_gasto {
