@@ -16,22 +16,14 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
-	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/udistrital/utils_oas/formatdata"
-	xray2 "github.com/udistrital/utils_oas/xray"
+	"github.com/udistrital/utils_oas/xray"
 )
 
 const (
 	JSON_error          string = "Error en el archivo JSON"
 	ErrorParametros     string = "Error en los parametros de ingreso"
 	ErrorBody           string = "Cuerpo de la peticion invalido"
-	CargaResExito       string = "Resoluciones cargadas con exito"
-	CampoMeses          string = "%.1f meses"
-	PasaA               string = "Pasa a %.1f"
-	ResolucionEndpoint  string = "resolucion/"
-	ParametroEndpoint   string = "parametro/"
-	VinculacionEndpoint string = "vinculacion_docente/"
-	ResVinEndpoint      string = "resolucion_vinculacion_docente/"
 	AppJson             string = "application/json"
 	Calibri             string = "Calibri"
 	CalibriBold         string = "Calibri-Bold"
@@ -43,7 +35,6 @@ const (
 // Envia una petición con datos al endpoint indicado y extrae la respuesta del campo Data para retornarla
 func SendRequestNew(endpoint string, route string, trequest string, target interface{}, datajson interface{}) error {
 	url := beego.AppConfig.String("ProtocolAdmin") + beego.AppConfig.String(endpoint) + route
-
 	var response map[string]interface{}
 	var err error
 	err = SendJson(url, trequest, &response, &datajson)
@@ -129,158 +120,115 @@ func SendJson(url string, trequest string, target interface{}, datajson interfac
 			beego.Error(err)
 		}
 	}
-	req, err := http.NewRequestWithContext(xray2.GlobalContext, trequest, url, b)
+	req, _ := http.NewRequest(trequest, url, b)
 	req.Header.Set("Accept", AppJson)
 	req.Header.Add("Content-Type", AppJson)
-	resp, err := xray.Client(http.DefaultClient).Do(req)
+	seg2 := xray.BeginSegmentSec(req)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	xray.UpdateSegment(resp, err, seg2)
 	if err != nil {
 		beego.Error("error", err)
-		xray2.ErrorController5xx(err)
 		return err
-	} else {
-		xray2.UpdateState(resp.StatusCode, err)
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
 			beego.Error(err)
 		}
 	}()
-
 	return json.NewDecoder(resp.Body).Decode(target)
 }
 
 func GetJsonTest(url string, target interface{}) (status int, err error) {
-
-	req, err := http.NewRequestWithContext(xray2.GlobalContext, "GET", url, nil)
-
-	resp, err := xray.Client(http.DefaultClient).Do(req)
+	req, _ := http.NewRequest("GET", url, nil)
+	seg2 := xray.BeginSegmentSec(req)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	xray.UpdateSegment(resp, err, seg2)
 	if err != nil {
-		xray2.ErrorController5xx(err)
 		return resp.StatusCode, err
-	} else {
-		xray2.UpdateState(resp.StatusCode, err)
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
 			beego.Error(err)
 		}
 	}()
-
 	return resp.StatusCode, json.NewDecoder(resp.Body).Decode(target)
 }
 
 func GetJson(url string, target interface{}) error {
-	//fmt.Println("context 1: ", xray2.GetContext())
-	// Crear un emisor personalizado
-	ctx, seg2 := xray.BeginSegment(xray2.GlobalContext, url)
-	xray2.GlobalContext = ctx
-	//seg2.Origin = url
-	//seg2.ParentSegment = xray2.Seg
-	//fmt.Println("trace 1: ", xray2.Seg.TraceID)
-	//fmt.Println("parent: ", xray2.Seg.ID)
-	//fmt.Println("trace 2: ", xray2.Seg.DownstreamHeader().String())
-	seg2.TraceID = xray2.Seg.TraceID
-	//fmt.Println("context 232..........: ", ctx.Value(xray.ContextKey))
-
-	seg2.ParentID = xray2.Seg.ID
-	//fmt.Println("context new: ", ctx)
-	//fmt.Println("trace ID: ", xray2.Seg.TraceID)
 	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("X-Amzn-Trace-Id", xray2.Seg.DownstreamHeader().String())
-
-	seg2.Name = req.Host
-	/*seg2.HTTP = &xray.HTTPData{
-		Request: &xray.RequestData{
-			Method: req.Method,
-			URL:    url,
-		},
-		Response: &xray.ResponseData{
-			Status: 500,
-		},
-	}*/
-
+	seg2 := xray.BeginSegmentSec(req)
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	//fmt.Println("context DONE seg 1: ", seg2.ContextDone)
-	seg2.Close(nil)
-	//fmt.Println("context emitted -----------: ", seg2.Emitted)
+	xray.UpdateSegment(resp, err, seg2)
 	if err != nil {
-		xray2.ErrorController5xx(err)
 		return err
-	} else {
-		xray2.UpdateState(resp.StatusCode, err)
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
 			beego.Error(err)
 		}
 	}()
-
-	//fmt.Println("segment ex:", )
-	fmt.Println("context final: ", xray2.GlobalContext)
-	fmt.Println("context final 2 -----------: ", xray.GetSegment(xray2.GlobalContext).Name)
 	return json.NewDecoder(resp.Body).Decode(target)
 }
 
 func GetXml(url string, target interface{}) error {
 
-	req, err := http.NewRequestWithContext(xray2.GlobalContext, "GET", url, nil)
-	resp, err := xray.Client(http.DefaultClient).Do(req)
+	req, _ := http.NewRequest("GET", url, nil)
+	seg2 := xray.BeginSegmentSec(req)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	xray.UpdateSegment(resp, err, seg2)
 	if err != nil {
-		xray2.ErrorController5xx(err)
 		return err
-	} else {
-		xray2.UpdateState(resp.StatusCode, err)
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
 			beego.Error(err)
 		}
 	}()
-
 	return xml.NewDecoder(resp.Body).Decode(target)
 }
 
 func GetJsonWSO2(urlp string, target interface{}) error {
 	b := new(bytes.Buffer)
-	req, err := http.NewRequestWithContext(xray2.GlobalContext, "GET", urlp, b)
+	req, _ := http.NewRequest("GET", urlp, b)
 	req.Header.Set("Accept", AppJson)
-	resp, err := xray.Client(http.DefaultClient).Do(req)
+	seg2 := xray.BeginSegmentSec(req)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	xray.UpdateSegment(resp, err, seg2)
 	if err != nil {
 		beego.Error("error", err)
-		xray2.ErrorController5xx(err)
 		return err
-	} else {
-		xray2.UpdateState(resp.StatusCode, err)
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
 			beego.Error(err)
 		}
 	}()
-
 	return json.NewDecoder(resp.Body).Decode(target)
 }
 
 func GetJsonWSO2Test(urlp string, target interface{}) (status int, err error) {
 
 	b := new(bytes.Buffer)
-	req, err := http.NewRequestWithContext(xray2.GlobalContext, "GET", urlp, b)
+	req, _ := http.NewRequest("GET", urlp, b)
 	req.Header.Set("Accept", AppJson)
-	resp, err := xray.Client(http.DefaultClient).Do(req)
+	seg2 := xray.BeginSegmentSec(req)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	xray.UpdateSegment(resp, err, seg2)
 	if err != nil {
 		beego.Error("error", err)
-		xray2.ErrorController5xx(err)
 		return resp.StatusCode, err
-	} else {
-		xray2.UpdateState(resp.StatusCode, err)
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
 			beego.Error(nil, err)
 		}
 	}()
-
 	return resp.StatusCode, json.NewDecoder(resp.Body).Decode(target)
 }
 
@@ -452,12 +400,10 @@ func ErrorController(c beego.Controller, controller string) {
 		localError := err.(map[string]interface{})
 		c.Data["mesaage"] = (beego.AppConfig.String("appname") + "/" + controller + "/" + (localError["funcion"]).(string))
 		c.Data["data"] = (localError["err"])
-		xray2.EvaluateState(http.StatusBadRequest)
-		xray2.EndSegmentErr(localError["err"])
+		xray.EndSegmentErr(http.StatusBadRequest, localError["err"])
 		if status, ok := localError["status"]; ok {
 			c.Abort(status.(string))
 		} else {
-			xray2.Seg.AddError(fmt.Errorf("%v", err))
 			c.Abort("500")
 		}
 	}
