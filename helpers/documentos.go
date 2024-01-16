@@ -14,6 +14,7 @@ import (
 	"github.com/astaxie/beego/logs"
 	"github.com/phpdave11/gofpdf"
 	"github.com/udistrital/cumplidos_dve_mid/models"
+	"github.com/udistrital/utils_oas/request"
 )
 
 func GetSolicitudesSupervisor(doc_supervisor string) (pagos_personas_proyecto []models.PagoPersonaProyecto, outputError map[string]interface{}) {
@@ -29,15 +30,15 @@ func GetSolicitudesSupervisor(doc_supervisor string) (pagos_personas_proyecto []
 	var contratistas []models.InformacionProveedor
 	var pago_personas_proyecto models.PagoPersonaProyecto
 	var vinculaciones_docente []models.VinculacionDocente
-	if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:PRS_DVE", &parametro); err == nil {
-		if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?limit=-1&query=Responsable:"+doc_supervisor+",EstadoPagoMensualId:"+strconv.Itoa(parametro[0].Id), &pagos_mensuales); err == nil {
+	if err := request.GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:PRS_DVE", &parametro); err == nil {
+		if err := request.GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?limit=-1&query=Responsable:"+doc_supervisor+",EstadoPagoMensualId:"+strconv.Itoa(parametro[0].Id), &pagos_mensuales); err == nil {
 			for x, pago_mensual := range pagos_mensuales {
-				if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", "informacion_proveedor/?query=NumDocumento:"+pago_mensual.Persona, &contratistas); err == nil {
+				if err := request.GetRequestLegacy("CumplidosDveUrlCrudAgora", "informacion_proveedor/?query=NumDocumento:"+pago_mensual.Persona, &contratistas); err == nil {
 					for _, contratista := range contratistas {
-						if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=NumeroContrato:"+pago_mensual.NumeroContrato+",Vigencia:"+strconv.FormatFloat(pago_mensual.VigenciaContrato, 'f', 0, 64), &vinculaciones_docente); err == nil {
+						if err := request.GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=NumeroContrato:"+pago_mensual.NumeroContrato+",Vigencia:"+strconv.FormatFloat(pago_mensual.VigenciaContrato, 'f', 0, 64), &vinculaciones_docente); err == nil {
 							for _, vinculacion := range vinculaciones_docente {
 								var dep models.Dependencia
-								if err := GetRequestLegacy("CumplidosDveUrlCrudOikos", "dependencia/"+strconv.Itoa(vinculacion.ProyectoCurricularId), &dep); err == nil {
+								if err := request.GetRequestLegacy("CumplidosDveUrlCrudOikos", "dependencia/"+strconv.Itoa(vinculacion.ProyectoCurricularId), &dep); err == nil {
 									pago_personas_proyecto.PagoMensual = &pagos_mensuales[x]
 									pago_personas_proyecto.NombrePersona = contratista.NomProveedor
 									pago_personas_proyecto.Dependencia = &dep
@@ -78,15 +79,15 @@ func GetSolicitudesCoordinador(doc_coordinador string) (pagos_personas_proyecto 
 	var pago_personas_proyecto models.PagoPersonaProyecto
 	var vinculaciones_docente []models.VinculacionDocente
 
-	if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:PRC_DVE", &parametro); err == nil {
-		if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?limit=-1&query=Responsable:"+doc_coordinador+",EstadoPagoMensualId:"+strconv.Itoa(parametro[0].Id), &pagos_mensuales); err == nil {
+	if err := request.GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:PRC_DVE", &parametro); err == nil {
+		if err := request.GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?limit=-1&query=Responsable:"+doc_coordinador+",EstadoPagoMensualId:"+strconv.Itoa(parametro[0].Id), &pagos_mensuales); err == nil {
 			for x, _ := range pagos_mensuales {
-				if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", "informacion_proveedor/?query=NumDocumento:"+pagos_mensuales[x].Persona, &contratistas); err == nil {
+				if err := request.GetRequestLegacy("CumplidosDveUrlCrudAgora", "informacion_proveedor/?query=NumDocumento:"+pagos_mensuales[x].Persona, &contratistas); err == nil {
 					for _, contratista := range contratistas {
-						if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=NumeroContrato:"+pagos_mensuales[x].NumeroContrato+",Vigencia:"+strconv.FormatFloat(pagos_mensuales[x].VigenciaContrato, 'f', 0, 64), &vinculaciones_docente); err == nil {
+						if err := request.GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=NumeroContrato:"+pagos_mensuales[x].NumeroContrato+",Vigencia:"+strconv.FormatFloat(pagos_mensuales[x].VigenciaContrato, 'f', 0, 64), &vinculaciones_docente); err == nil {
 							for y, _ := range vinculaciones_docente {
 								var dep []models.Dependencia
-								if err := GetRequestLegacy("CumplidosDveUrlCrudOikos", "dependencia/?query=Id:"+strconv.Itoa(vinculaciones_docente[y].ProyectoCurricularId), &dep); err == nil {
+								if err := request.GetRequestLegacy("CumplidosDveUrlCrudOikos", "dependencia/?query=Id:"+strconv.Itoa(vinculaciones_docente[y].ProyectoCurricularId), &dep); err == nil {
 									for z, _ := range dep {
 										pago_personas_proyecto.PagoMensual = &pagos_mensuales[x]
 										pago_personas_proyecto.NombrePersona = contratista.NomProveedor
@@ -131,17 +132,17 @@ func CertificacionVistoBueno(dependencia string, mes string, anio string) (perso
 	var anio_cer, _ = strconv.Atoi(anio)
 	var imprimir = true
 
-	if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=ProyectoCurricularId:"+dependencia, &vinculaciones_docente); err == nil {
+	if err := request.GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=ProyectoCurricularId:"+dependencia, &vinculaciones_docente); err == nil {
 		for _, vinculacion_docente := range vinculaciones_docente {
 			if vinculacion_docente.Activo == true {
-				if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", "acta_inicio/?query=NumeroContrato:"+vinculacion_docente.NumeroContrato+",Vigencia:"+strconv.FormatInt(vinculacion_docente.Vigencia, 10), &actasInicio); err == nil {
+				if err := request.GetRequestLegacy("CumplidosDveUrlCrudAgora", "acta_inicio/?query=NumeroContrato:"+vinculacion_docente.NumeroContrato+",Vigencia:"+strconv.FormatInt(vinculacion_docente.Vigencia, 10), &actasInicio); err == nil {
 					for _, actaInicio := range actasInicio {
 						if (actaInicio.FechaInicio.Year() == actaInicio.FechaFin.Year() && int(actaInicio.FechaInicio.Month()) <= mes_cer && actaInicio.FechaInicio.Year() <= anio_cer && int(actaInicio.FechaFin.Month()) >= mes_cer && actaInicio.FechaFin.Year() >= anio_cer) ||
 							(actaInicio.FechaInicio.Year() < actaInicio.FechaFin.Year() && int(actaInicio.FechaInicio.Month()) <= mes_cer && actaInicio.FechaInicio.Year() <= anio_cer && int(actaInicio.FechaFin.Month()) <= mes_cer && actaInicio.FechaFin.Year() > anio_cer) ||
 							(actaInicio.FechaInicio.Year() < actaInicio.FechaFin.Year() && int(actaInicio.FechaInicio.Month()) >= mes_cer && actaInicio.FechaInicio.Year() < anio_cer && int(actaInicio.FechaFin.Month()) >= mes_cer && actaInicio.FechaFin.Year() >= anio_cer) {
-							if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion.in:PAD_DVE|AD_DVE|AP_DVE|PRS_DVE|AS_DVE", &parametros); err == nil {
+							if err := request.GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion.in:PAD_DVE|AD_DVE|AP_DVE|PRS_DVE|AS_DVE", &parametros); err == nil {
 								for _, parametro := range parametros {
-									if err := GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?query=EstadoPagoMensualId:"+strconv.Itoa(parametro.Id)+",NumeroContrato:"+vinculacion_docente.NumeroContrato+",VigenciaContrato:"+strconv.FormatInt(vinculacion_docente.Vigencia, 10)+",Mes:"+mes+",Ano:"+anio, &pagos_mensuales); err == nil {
+									if err := request.GetRequestNew("CumplidosDveUrlCrud", "pago_mensual/?query=EstadoPagoMensualId:"+strconv.Itoa(parametro.Id)+",NumeroContrato:"+vinculacion_docente.NumeroContrato+",VigenciaContrato:"+strconv.FormatInt(vinculacion_docente.Vigencia, 10)+",Mes:"+mes+",Ano:"+anio, &pagos_mensuales); err == nil {
 										if len((pagos_mensuales)) != 0 {
 											imprimir = false
 										}
@@ -150,7 +151,7 @@ func CertificacionVistoBueno(dependencia string, mes string, anio string) (perso
 									}
 								}
 								if imprimir {
-									if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", "informacion_proveedor/?query=NumDocumento:"+strconv.Itoa(vinculacion_docente.PersonaId), &contratistas); err == nil {
+									if err := request.GetRequestLegacy("CumplidosDveUrlCrudAgora", "informacion_proveedor/?query=NumDocumento:"+strconv.Itoa(vinculacion_docente.PersonaId), &contratistas); err == nil {
 										for _, contratista := range contratistas {
 											persona.NumDocumento = contratista.NumDocumento
 											persona.Nombre = contratista.NomProveedor
@@ -335,7 +336,7 @@ func AprobarMultiplesSolicitudes(v []models.PagoMensual) (resultado string, outp
 
 	var response interface{}
 	for _, pm := range v {
-		if err := SendRequestNew("CumplidosDveUrlCrud", "pago_mensual/"+strconv.Itoa(pm.Id), "PUT", &response, &pm); err == nil {
+		if err := request.SendRequestNew("CumplidosDveUrlCrud", "pago_mensual/"+strconv.Itoa(pm.Id), "PUT", &response, &pm); err == nil {
 			resultado = "OK"
 		} else {
 			panic(err.Error())

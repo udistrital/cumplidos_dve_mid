@@ -6,6 +6,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/udistrital/cumplidos_dve_mid/helpers"
 	"github.com/udistrital/cumplidos_dve_mid/models"
+	"github.com/udistrital/utils_oas/request"
 )
 
 // AprobacionDocumentosController operations for AprobacionDocumentos
@@ -30,11 +31,11 @@ func (c *AprobacionDocumentosController) URLMapping() {
 // @Failure 403 :docsupervisor is empty
 // @router /solicitudes_supervisor/:docsupervisor [get]
 func (c *AprobacionDocumentosController) SolicitudesSupervisor() {
-	defer helpers.ErrorController(c.Controller, "AprobacionDocumentosController")
+	defer request.ErrorController(c.Controller, "AprobacionDocumentosController")
 
 	doc_supervisor := c.GetString(":docsupervisor")
 	if doc_supervisor == "" {
-		panic(map[string]interface{}{"funcion": "SolicitudesSupervisor", "err": helpers.ErrorParametros, "status": "400"})
+		panic(map[string]interface{}{"funcion": "SolicitudesSupervisor", "err": request.ErrorParametros, "status": "400"})
 	}
 
 	if data, err2 := helpers.GetSolicitudesSupervisor(doc_supervisor); err2 == nil {
@@ -55,12 +56,12 @@ func (c *AprobacionDocumentosController) SolicitudesSupervisor() {
 // @Failure 403 :doccoordinador is empty
 // @router /solicitudes_coordinador/:doccoordinador [get]
 func (c *AprobacionDocumentosController) SolicitudesCoordinador() {
-	defer helpers.ErrorController(c.Controller, "AprobacionDocumentosController")
+	defer request.ErrorController(c.Controller, "AprobacionDocumentosController")
 
 	doc_coordinador := c.GetString(":doccoordinador")
 
 	if doc_coordinador == "" {
-		panic(map[string]interface{}{"funcion": "SolicitudesCoordinador", "err": helpers.ErrorParametros, "status": "400"})
+		panic(map[string]interface{}{"funcion": "SolicitudesCoordinador", "err": request.ErrorParametros, "status": "400"})
 	}
 
 	if data, err2 := helpers.GetSolicitudesCoordinador(doc_coordinador); err2 == nil {
@@ -85,14 +86,14 @@ func (c *AprobacionDocumentosController) SolicitudesCoordinador() {
 // @Failure 403 :anio is empty
 // @router /certificacion_visto_bueno/:dependencia/:mes/:anio [get]
 func (c *AprobacionDocumentosController) CertificacionVistoBueno() {
-	defer helpers.ErrorController(c.Controller, "AprobacionDocumentosController")
+	defer request.ErrorController(c.Controller, "AprobacionDocumentosController")
 
 	dependencia := c.GetString(":dependencia")
 	mes := c.GetString(":mes")
 	anio := c.GetString(":anio")
 
 	if dependencia == "" && mes == "" && anio == "" {
-		panic(map[string]interface{}{"funcion": "CertificacionVistoBueno", "err": helpers.ErrorParametros, "status": "400"})
+		panic(map[string]interface{}{"funcion": "CertificacionVistoBueno", "err": request.ErrorParametros, "status": "400"})
 	}
 
 	if data, err2 := helpers.CertificacionVistoBueno(dependencia, mes, anio); err2 == nil {
@@ -119,7 +120,7 @@ func (c *AprobacionDocumentosController) CertificacionVistoBueno() {
 // @Failure 403 :periodo is empty
 // @router /generar_certificado/:nombre/:proyecto_curricular/:dependencia/:facultad/:mes/:anio/:periodo [get]
 func (c *AprobacionDocumentosController) GenerarCertificado() {
-	defer helpers.ErrorController(c.Controller, "AprobacionDocumentosController")
+	defer request.ErrorController(c.Controller, "AprobacionDocumentosController")
 
 	nombre := c.GetString(":nombre")
 	proyecto_curricular := c.GetString(":proyecto_curricular")
@@ -159,7 +160,7 @@ func (c *AprobacionDocumentosController) GenerarCertificado() {
 	}
 
 	if proyecto_curricular == "" && facultad == "" && mes == "" && anio == "" && periodo == "" {
-		panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": helpers.ErrorParametros, "status": "400"})
+		panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": request.ErrorParametros, "status": "400"})
 	}
 	if docentes_incumplidos, err := helpers.CertificacionVistoBueno(dependencia, NumeroMes, anio); err == nil {
 		if data, err2 := helpers.GenerarPDF(nombre, proyecto_curricular, docentes_incumplidos, facultad, mes, anio, periodo); err2 == nil {
@@ -179,10 +180,10 @@ func (c *AprobacionDocumentosController) GenerarCertificado() {
 // @Failure 403
 // @router /aprobar_documentos [post]
 func (c *AprobacionDocumentosController) AprobarSolicitudes() {
-	defer helpers.ErrorController(c.Controller, "AprobacionDocumentosController")
+	defer request.ErrorController(c.Controller, "AprobacionDocumentosController")
 
-	if v, e := helpers.ValidarBody(c.Ctx.Input.RequestBody); !v || e != nil {
-		panic(map[string]interface{}{"funcion": "AprobarSolicitudes", "err": helpers.ErrorBody, "status": "400"})
+	if v, e := request.ValidarBody(c.Ctx.Input.RequestBody); !v || e != nil {
+		panic(map[string]interface{}{"funcion": "AprobarSolicitudes", "err": request.ErrorBody, "status": "400"})
 	}
 
 	var m []models.PagoMensual

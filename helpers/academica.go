@@ -6,6 +6,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/cumplidos_dve_mid/models"
+	"github.com/udistrital/utils_oas/request"
 )
 
 func CargarInformacionCoordinador(DependenciaOikosId int) (info_coordinador models.InformacionCoordinador, outputError map[string]interface{}) {
@@ -20,13 +21,13 @@ func CargarInformacionCoordinador(DependenciaOikosId int) (info_coordinador mode
 	var temp map[string]interface{}
 	var temp_snies map[string]interface{}
 
-	if err = GetJsonWSO2(beego.AppConfig.String("CumplidosDveUrlWso2")+beego.AppConfig.String("CumplidosDveHomologacion")+"/"+"proyecto_curricular_oikos/"+strconv.Itoa(DependenciaOikosId), &temp); err == nil && temp != nil {
+	if err = request.GetJsonWSO2(beego.AppConfig.String("CumplidosDveUrlWso2")+beego.AppConfig.String("CumplidosDveHomologacion")+"/"+"proyecto_curricular_oikos/"+strconv.Itoa(DependenciaOikosId), &temp); err == nil && temp != nil {
 		json_proyecto_curricular, error_json := json.Marshal(temp)
 		if error_json == nil {
 			var temp_homologacion models.ObjetoProyectoCurricular
 			if err = json.Unmarshal(json_proyecto_curricular, &temp_homologacion); err == nil {
 				id_proyecto_snies := temp_homologacion.Homologacion.IDSnies
-				if err = GetJsonWSO2(beego.AppConfig.String("CumplidosDveUrlWso2")+beego.AppConfig.String("CumplidosDveAcademica")+"/"+"carrera_snies/"+id_proyecto_snies, &temp_snies); err == nil && temp_snies != nil {
+				if err = request.GetJsonWSO2(beego.AppConfig.String("CumplidosDveUrlWso2")+beego.AppConfig.String("CumplidosDveAcademica")+"/"+"carrera_snies/"+id_proyecto_snies, &temp_snies); err == nil && temp_snies != nil {
 					json_info_coordinador, error_json := json.Marshal(temp_snies)
 					if error_json == nil {
 						var temp_info_coordinador models.InformacionCoordinador
@@ -72,17 +73,17 @@ func CargarContratosDocente(numDocumento int) (contratosDocentes []models.Contra
 	var parametro []models.Parametro
 
 	//CONSULTA LA INFORMACION DE PROVEEDOR
-	if err = GetRequestLegacy("CumplidosDveUrlCrudAgora", "informacion_proveedor/?query=num_documento:"+strconv.Itoa(numDocumento), &proveedor); err == nil {
+	if err = request.GetRequestLegacy("CumplidosDveUrlCrudAgora", "informacion_proveedor/?query=num_documento:"+strconv.Itoa(numDocumento), &proveedor); err == nil {
 		//CONSULTA LA VINCULACION DEL DOCENTE
-		if err = GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?query=PersonaId:"+strconv.Itoa(numDocumento)+"&limit=-1", &vinculaciones); err == nil {
+		if err = request.GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?query=PersonaId:"+strconv.Itoa(numDocumento)+"&limit=-1", &vinculaciones); err == nil {
 			for _, vinculacion := range vinculaciones {
-				if err = GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=Id:"+strconv.FormatInt(vinculacion.DedicacionId, 10), &parametro); err == nil {
+				if err = request.GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=Id:"+strconv.FormatInt(vinculacion.DedicacionId, 10), &parametro); err == nil {
 					//CONSULTA LA DEPENDENCIA DE CADA VINCULACION
-					if err = GetRequestLegacy("CumplidosDveUrlCrudOikos", "dependencia/"+strconv.Itoa(vinculacion.ProyectoCurricularId), &dep); err == nil {
+					if err = request.GetRequestLegacy("CumplidosDveUrlCrudOikos", "dependencia/"+strconv.Itoa(vinculacion.ProyectoCurricularId), &dep); err == nil {
 						//CONSULTA A RESOLUCION
-						if err = GetRequestNew("CumplidosDveUrlCrudResoluciones", "resolucion/?query=Id:"+strconv.Itoa(vinculacion.ResolucionVinculacionDocenteId.Id), &res); err == nil {
+						if err = request.GetRequestNew("CumplidosDveUrlCrudResoluciones", "resolucion/?query=Id:"+strconv.Itoa(vinculacion.ResolucionVinculacionDocenteId.Id), &res); err == nil {
 							//CONSULTA LAS ACTAS DE INICIO
-							if err = GetRequestLegacy("CumplidosDveUrlCrudAgora", "acta_inicio/?query=NumeroContrato:"+vinculacion.NumeroContrato+",Vigencia:"+strconv.FormatInt(vinculacion.Vigencia, 10), &actasInicio); err == nil {
+							if err = request.GetRequestLegacy("CumplidosDveUrlCrudAgora", "acta_inicio/?query=NumeroContrato:"+vinculacion.NumeroContrato+",Vigencia:"+strconv.FormatInt(vinculacion.Vigencia, 10), &actasInicio); err == nil {
 								for _, actaInicio := range actasInicio {
 									actaInicio.FechaInicio = actaInicio.FechaInicio.UTC()
 									actaInicio.FechaFin = actaInicio.FechaFin.UTC()

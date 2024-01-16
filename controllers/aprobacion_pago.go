@@ -6,6 +6,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/udistrital/cumplidos_dve_mid/helpers"
 	"github.com/udistrital/cumplidos_dve_mid/models"
+	"github.com/udistrital/utils_oas/request"
 )
 
 // AprobacionPagoController operations for AprobacionPago
@@ -37,14 +38,14 @@ func (c *AprobacionPagoController) URLMapping() {
 // @Failure 403 :anio is empty
 // @router /certificacion_documentos_aprobados/:dependencia/:mes/:anio [get]
 func (c *AprobacionPagoController) CertificacionDocumentosAprobados() {
-	defer helpers.ErrorController(c.Controller, "AprobacionPagoController")
+	defer request.ErrorController(c.Controller, "AprobacionPagoController")
 
 	dependencia := c.GetString(":dependencia")
 	mes := c.GetString(":mes")
 	anio := c.GetString(":anio")
 
 	if dependencia == "" && mes == "" && anio == "" {
-		panic(map[string]interface{}{"funcion": "CertificacionDocumentosAprobados", "err": helpers.ErrorParametros, "status": "400"})
+		panic(map[string]interface{}{"funcion": "CertificacionDocumentosAprobados", "err": request.ErrorParametros, "status": "400"})
 	}
 
 	if data, err2 := helpers.CargarCertificacionDocumentosAprobados(dependencia, mes, anio); err2 == nil {
@@ -71,7 +72,7 @@ func (c *AprobacionPagoController) CertificacionDocumentosAprobados() {
 // @Failure 403 :anio is empty
 // @router /pago_aprobado/:numero_contrato/:vigencia/:mes/:anio [get]
 func (c *AprobacionPagoController) PagoAprobado() {
-	defer helpers.ErrorController(c.Controller, "AprobacionPagoController")
+	defer request.ErrorController(c.Controller, "AprobacionPagoController")
 
 	numero_contrato := c.GetString(":numero_contrato")
 	vigencia := c.GetString(":vigencia")
@@ -79,7 +80,7 @@ func (c *AprobacionPagoController) PagoAprobado() {
 	anio := c.GetString(":anio")
 
 	if numero_contrato == "" && vigencia == "" && mes == "" && anio == "" {
-		panic(map[string]interface{}{"funcion": "PagoAprobado", "err": helpers.ErrorParametros, "status": "400"})
+		panic(map[string]interface{}{"funcion": "PagoAprobado", "err": request.ErrorParametros, "status": "400"})
 	}
 
 	if data, err2 := helpers.ConsultarPagoAprobado(numero_contrato, vigencia, mes, anio); err2 == nil {
@@ -99,14 +100,14 @@ func (c *AprobacionPagoController) PagoAprobado() {
 // @Failure 403 :docordenador is empty
 // @router /solicitudes_ordenador/:docordenador [get]
 func (c *AprobacionPagoController) SolicitudesOrdenador() {
-	defer helpers.ErrorController(c.Controller, "AprobacionPagoController")
+	defer request.ErrorController(c.Controller, "AprobacionPagoController")
 
 	doc_ordenador := c.GetString(":docordenador")
 	limit, err0 := c.GetInt("limit")
 	offset, err0 := c.GetInt("offset")
 
 	if doc_ordenador == "" && limit <= 0 && offset <= 0 {
-		panic(map[string]interface{}{"funcion": "SolicitudesOrdenador", "err": helpers.ErrorParametros, "status": "400"})
+		panic(map[string]interface{}{"funcion": "SolicitudesOrdenador", "err": request.ErrorParametros, "status": "400"})
 	}
 
 	if data, err2 := helpers.CargarSolicitudesOrdenador(doc_ordenador, limit, offset, err0); err2 == nil {
@@ -127,12 +128,12 @@ func (c *AprobacionPagoController) SolicitudesOrdenador() {
 // @Failure 403 :docordenador is empty
 // @router /dependencia_ordenador/:docordenador [get]
 func (c *AprobacionPagoController) DependenciaOrdenador() {
-	defer helpers.ErrorController(c.Controller, "AprobacionPagoController")
+	defer request.ErrorController(c.Controller, "AprobacionPagoController")
 
 	doc_ordenador := c.GetString(":docordenador")
 
 	if doc_ordenador == "" {
-		panic(map[string]interface{}{"funcion": "DependenciaOrdenador", "err": helpers.ErrorParametros, "status": "400"})
+		panic(map[string]interface{}{"funcion": "DependenciaOrdenador", "err": request.ErrorParametros, "status": "400"})
 	}
 
 	if data, err2 := helpers.ObtenerDependenciaOrdenador(doc_ordenador); err2 == nil && data != 0 {
@@ -155,13 +156,13 @@ func (c *AprobacionPagoController) DependenciaOrdenador() {
 // @Failure 403 :vigencia is empty
 // @router /informacion_ordenador/:numero_contrato/:vigencia [get]
 func (c *AprobacionPagoController) InfoOrdenador() {
-	defer helpers.ErrorController(c.Controller, "AprobacionPagoController")
+	defer request.ErrorController(c.Controller, "AprobacionPagoController")
 
 	numero_contrato := c.GetString(":numero_contrato")
 	vigencia := c.GetString(":vigencia")
 
 	if numero_contrato == "" && vigencia == "" {
-		panic(map[string]interface{}{"funcion": "InfoOrdenador", "err": helpers.ErrorParametros, "status": "400"})
+		panic(map[string]interface{}{"funcion": "InfoOrdenador", "err": request.ErrorParametros, "status": "400"})
 	}
 
 	if data, err2 := helpers.ObtenerInfoOrdenador(numero_contrato, vigencia); err2 == nil && data.NumeroDocumento != 0 {
@@ -191,7 +192,7 @@ func (c *AprobacionPagoController) InfoOrdenador() {
 // @Failure 403 :periodo is empty
 // @router /generar_certificado/:nombre/:facultad/:dependencia/:mes/:anio/:periodo [get]
 func (c *AprobacionPagoController) GenerarCertificado() {
-	defer helpers.ErrorController(c.Controller, "AprobacionPagoController")
+	defer request.ErrorController(c.Controller, "AprobacionPagoController")
 
 	nombre := c.GetString(":nombre")
 	facultad := c.GetString(":facultad")
@@ -230,7 +231,7 @@ func (c *AprobacionPagoController) GenerarCertificado() {
 	}
 
 	if nombre == "" && facultad == "" && dependencia == "" && mes == "" && anio == "" && periodo == "" {
-		panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": helpers.ErrorParametros, "status": "400"})
+		panic(map[string]interface{}{"funcion": "GenerarCertificado", "err": request.ErrorParametros, "status": "400"})
 	}
 
 	if docentes_incumplidos, err := helpers.CargarCertificacionDocumentosAprobados(facultad, NumeroMes, anio); err == nil {
@@ -254,10 +255,10 @@ func (c *AprobacionPagoController) GenerarCertificado() {
 // @Failure 403
 // @router /enviar_titan [post]
 func (c *AprobacionPagoController) EnviarTitan() {
-	defer helpers.ErrorController(c.Controller, "AprobacionPagoController")
+	defer request.ErrorController(c.Controller, "AprobacionPagoController")
 
-	if v, e := helpers.ValidarBody(c.Ctx.Input.RequestBody); !v || e != nil {
-		panic(map[string]interface{}{"funcion": "EnviarTitan", "err": helpers.ErrorBody, "status": "400"})
+	if v, e := request.ValidarBody(c.Ctx.Input.RequestBody); !v || e != nil {
+		panic(map[string]interface{}{"funcion": "EnviarTitan", "err": request.ErrorBody, "status": "400"})
 	}
 
 	var m models.PagoMensual
@@ -283,10 +284,10 @@ func (c *AprobacionPagoController) EnviarTitan() {
 // @Failure 403
 // @router /aprobar_pagos [post]
 func (c *AprobacionPagoController) AprobarPagos() {
-	defer helpers.ErrorController(c.Controller, "AprobacionPagoController")
+	defer request.ErrorController(c.Controller, "AprobacionPagoController")
 
-	if v, e := helpers.ValidarBody(c.Ctx.Input.RequestBody); !v || e != nil {
-		panic(map[string]interface{}{"funcion": "AprobarPagos", "err": helpers.ErrorBody, "status": "400"})
+	if v, e := request.ValidarBody(c.Ctx.Input.RequestBody); !v || e != nil {
+		panic(map[string]interface{}{"funcion": "AprobarPagos", "err": request.ErrorBody, "status": "400"})
 	}
 
 	var m []models.PagoMensual

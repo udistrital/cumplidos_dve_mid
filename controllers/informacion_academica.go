@@ -5,6 +5,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/cumplidos_dve_mid/helpers"
+	"github.com/udistrital/utils_oas/request"
 )
 
 // InformacionAcademicaController operations for InformacionAcademica
@@ -27,13 +28,13 @@ func (c *InformacionAcademicaController) URLMapping() {
 // @Failure 403 :id_dependencia_oikos is empty
 // @router /informacion_coordinador/:id_dependencia_oikos [get]
 func (c *InformacionAcademicaController) ObtenerInfoCoordinador() {
-	defer helpers.ErrorController(c.Controller, "InformacionAcademicaController")
+	defer request.ErrorController(c.Controller, "InformacionAcademicaController")
 
 	id_oikos := c.Ctx.Input.Param(":id_dependencia_oikos")
 	id, err2 := strconv.Atoi(id_oikos)
 
 	if err2 != nil || id <= 0 {
-		panic(map[string]interface{}{"funcion": "ObtenerInfoCoordinador", "err": helpers.ErrorParametros, "status": "400", "message": "Error de registro"})
+		panic(map[string]interface{}{"funcion": "ObtenerInfoCoordinador", "err": request.ErrorParametros, "status": "400", "message": "Error de registro"})
 	}
 
 	if data, err3 := helpers.CargarInformacionCoordinador(id); err3 == nil && data.CarreraSniesCollection.CarreraSnies != nil {
@@ -54,15 +55,12 @@ func (c *InformacionAcademicaController) ObtenerInfoCoordinador() {
 // @router /contratos_docente/:numDocumento [get]
 
 func (c *InformacionAcademicaController) GetContratosDocente() {
-	defer helpers.ErrorController(c.Controller, "InformacionAcademicaController")
-
+	defer request.ErrorController(c.Controller, "InformacionAcademicaController")
 	numDocumento := c.Ctx.Input.Param(":numDocumento")
 	doc, err := strconv.Atoi(numDocumento)
-
 	if err != nil || doc <= 0 {
-		panic(map[string]interface{}{"funcion": "GetContratosDocente", "err": helpers.ErrorParametros, "status": "400"})
+		panic(map[string]interface{}{"funcion": "GetContratosDocente", "err": request.ErrorParametros, "status": "400"})
 	}
-
 	if data, err2 := helpers.CargarContratosDocente(doc); err2 == nil {
 		c.Ctx.Output.SetStatus(200)
 		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Contratos del Docente cargados con exito", "Data": data}
