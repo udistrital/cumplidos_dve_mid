@@ -412,7 +412,7 @@ func ConstruirDocumentoOrdenador(nombre string, facultad string, dependencia str
 	}
 
 	pdf.Ln(lineHeight * 3)
-	pdf.WriteAligned(0, lineHeight+1, "La presente certificación se expide con destino a la División de Recursos Humanos el día "+strconv.Itoa(now.Day())+" del mes de "+meses[now.Month()]+" de "+strconv.Itoa(now.Year())+".", "")
+	pdf.WriteAligned(0, lineHeight+1, "La presente certificación se expide con destino a la Oficina de Talento Humano el día "+strconv.Itoa(now.Day())+" del mes de "+meses[now.Month()]+" de "+strconv.Itoa(now.Year())+".", "")
 	pdf.Ln(lineHeight * 12)
 
 	pdf.SetFont(MinionProBoldCn, "B", fontSize)
