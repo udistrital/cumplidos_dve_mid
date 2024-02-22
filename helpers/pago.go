@@ -39,7 +39,7 @@ func CargarCertificacionDocumentosAprobados(dependencia string, mes string, anio
 	contrato_ordenador_dependencia = GetContratosOrdenadorDependencia(dependencia, anio+"-"+mes, anio+"-"+mes)
 	if len(contrato_ordenador_dependencia.ContratosOrdenadorDependencia.InformacionContratos) != 0 {
 		for _, contrato := range contrato_ordenador_dependencia.ContratosOrdenadorDependencia.InformacionContratos {
-			if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=NumeroContrato:"+contrato.NumeroContrato+",Vigencia:"+contrato.Vigencia, &vinculaciones_docente); err == nil {
+			if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=NumeroContrato:"+contrato.NumeroContrato+",Vigencia:"+contrato.Vigencia+",Activo:true", &vinculaciones_docente); err == nil {
 				for _, vinculacion_docente := range vinculaciones_docente {
 					if vinculacion_docente.NumeroContrato != "" {
 						if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:AP_DVE", &parametro); err == nil {
