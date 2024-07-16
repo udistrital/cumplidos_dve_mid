@@ -201,7 +201,7 @@ func ReporteSolicitudes(f models.FlitroReporte) (reporte []models.DatosReporte, 
 	if len(f.ProyectoCurricularId) == 0 {
 		//Se obtienen los contratos en resoluciones asociados a las dependencias hijas y la vigencia
 		for _, dependencia := range dependencias {
-			url2 := "vinculacion_docente/?limit=-1&query=activo:true,proyecto_curricular_id:" + strconv.Itoa(dependencia.Id) + ",vigencia:" + f.Vigencia
+			url2 := "vinculacion_docente/?limit=-1&query=numero_contrato.isnull:,activo:true,proyecto_curricular_id:" + strconv.Itoa(dependencia.Id) + ",vigencia:" + f.Vigencia
 			if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", url2, &vinculaciones_dependencia); err == nil {
 				if len(vinculaciones_dependencia) != 0 {
 					vinculaciones_facultad = append(vinculaciones_facultad, vinculaciones_dependencia...)
@@ -214,8 +214,8 @@ func ReporteSolicitudes(f models.FlitroReporte) (reporte []models.DatosReporte, 
 
 	} else {
 		// Se obtienen los contratos en resoluciones asociados a la dependencia
-		url6 := "vinculacion_docente/?limit=-1&query=activo:true,proyecto_curricular_id:" + f.ProyectoCurricularId + ",vigencia:" + f.Vigencia
-		if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", url6, &vinculaciones_dependencia); err == nil {
+		url3 := "vinculacion_docente/?limit=-1&query=numero_contrato.isnull:,activo:true,proyecto_curricular_id:" + f.ProyectoCurricularId + ",vigencia:" + f.Vigencia
+		if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", url3, &vinculaciones_dependencia); err == nil {
 			// Se busca contrato y vigencia en cumplidos_dve pago_mensual
 			reporte, outputError = llenaListadoReporte(vinculaciones_dependencia, pagos_mensuales, dependencias, f)
 
@@ -239,43 +239,54 @@ func llenaListadoReporte(vinculaciones []models.VinculacionDocente, pagos_mensua
 	// Se busca contrato y vigencia en cumplidos_dve pago_mensual
 	for _, vinculacion := range vinculaciones {
 		if len(vinculacion.NumeroContrato) != 0 {
-			url3 := "pago_mensual/?limit=-1&query=NumeroContrato:" + vinculacion.NumeroContrato + ",VigenciaContrato:" + strconv.FormatInt(vinculacion.Vigencia, 10)
+			url := "pago_mensual/?limit=-1&query=NumeroContrato:" + vinculacion.NumeroContrato + ",VigenciaContrato:" + strconv.FormatInt(vinculacion.Vigencia, 10)
 			if f.Mes != "" {
-				url3 = url3 + ",Mes:" + f.Mes
+				url = url + ",Mes:" + f.Mes
 			}
-			if err := GetRequestNew("CumplidosDveUrlCrud", url3, &pagos_mensuales); err == nil {
-				for _, pago_mensual := range pagos_mensuales {
+			if err := GetRequestNew("CumplidosDveUrlCrud", url, &pagos_mensuales); err == nil {
+				if len(pagos_mensuales) != 0 {
+					for _, pago_mensual := range pagos_mensuales {
 
-					var parametro models.Parametro
-					var docente []models.InformacionProveedor
+						var parametro models.Parametro
+						var docente []models.InformacionProveedor
 
-					// Obtén el nombre de la dependencia
-					nombre_dependencia := obtenerNombreDependencia(strconv.Itoa(vinculacion.ProyectoCurricularId), dependencias)
+						// Obtén el nombre de la dependencia
+						nombre_dependencia := obtenerNombreDependencia(strconv.Itoa(vinculacion.ProyectoCurricularId), dependencias)
 
-					//Consultar y obtener el nombre del estado en parametros
-					url4 := "parametro/" + strconv.Itoa(pago_mensual.EstadoPagoMensualId)
-					if err := GetRequestNew("CumplidosDveUrlParametros", url4, &parametro); err == nil {
-						data_reporte.Estado = parametro.Nombre
+						//Consultar y obtener el nombre del estado en parametros
+						url2 := "parametro/" + strconv.Itoa(pago_mensual.EstadoPagoMensualId)
+						if err := GetRequestNew("CumplidosDveUrlParametros", url2, &parametro); err == nil {
+							data_reporte.Estado = parametro.Nombre
 
-					} else {
-						panic(err.Error())
+						} else {
+							panic(err.Error())
+						}
+
+						//Consultar el nombre del docente en agora
+						url3 := "informacion_proveedor/?query=NumDocumento:" + pago_mensual.Persona
+						if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", url3, &docente); err == nil {
+							data_reporte.NombrePersona = docente[0].NomProveedor
+						} else {
+							panic(err.Error())
+						}
+
+						//Consultar el nombre del responsable en agora
+						url4 := "informacion_proveedor/?query=NumDocumento:" + pago_mensual.Responsable
+						if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", url4, &docente); err == nil {
+							data_reporte.NombreResponsable = docente[0].NomProveedor
+						} else {
+							panic(err.Error())
+						}
+						data_reporte.Ano = pago_mensual.Ano
+						data_reporte.Documento = pago_mensual.Persona
+						data_reporte.Id = pago_mensual.Id
+						data_reporte.Mes = pago_mensual.Mes
+						data_reporte.NumeroContrato = pago_mensual.NumeroContrato
+						data_reporte.ProyectoCurricular = nombre_dependencia
+						data_reporte.DocumentoResponsable = pago_mensual.Responsable
 					}
-
-					//Consultar el nombre del docente en agora
-					url5 := "informacion_proveedor/?query=NumDocumento:" + pago_mensual.Persona
-					if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", url5, &docente); err == nil {
-						data_reporte.NombrePersona = docente[0].NomProveedor
-					} else {
-						panic(err.Error())
-					}
-					data_reporte.Ano = pago_mensual.Ano
-					data_reporte.Documento = pago_mensual.Persona
-					data_reporte.Id = pago_mensual.Id
-					data_reporte.Mes = pago_mensual.Mes
-					data_reporte.NumeroContrato = pago_mensual.NumeroContrato
-					data_reporte.ProyectoCurricular = nombre_dependencia
+					listado_reporte = append(listado_reporte, data_reporte)
 				}
-				listado_reporte = append(listado_reporte, data_reporte)
 			} else {
 				panic(err.Error())
 			}
