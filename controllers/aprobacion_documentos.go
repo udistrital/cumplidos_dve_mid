@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/cumplidos_dve_mid/helpers"
@@ -20,6 +21,7 @@ func (c *AprobacionDocumentosController) URLMapping() {
 	c.Mapping("CertificacionVistoBueno", c.CertificacionVistoBueno)
 	c.Mapping("GenerarCertificado", c.GenerarCertificado)
 	c.Mapping("AprobarSolicitudes", c.AprobarSolicitudes)
+	c.Mapping("ReporteSolicitudes", c.ReporteSolicitudes)
 }
 
 // AprobacionDocumentosController ...
@@ -100,6 +102,61 @@ func (c *AprobacionDocumentosController) CertificacionVistoBueno() {
 		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Certificaciones de visto bueno cargadas con exito", "Data": data}
 	} else {
 		panic(map[string]interface{}{"funcion": "CertificacionVistoBueno", "err": err2, "status": "400"})
+	}
+
+	c.ServeJSON()
+}
+
+// AprobacionDocumentosController ...
+// @Title ReporteSolicitudes
+// @Description get ReporteSolicitudes
+// @Param Vigencia query int true "vigencia del contrato"
+// @Param Mes query int false "mes de cumplido"
+// @Param FacultadId query int true "id oikos de la facultad"
+// @Param ProyectoCurricularId query int false "id oikos del proyecto curicular"
+// @Success 200
+// @Failure 400
+// @Failure 403 vigencia is empty
+// @Failure 403 facultad_id is empty
+// @router /reporte_solicitudes [get]
+func (c *AprobacionDocumentosController) ReporteSolicitudes() {
+
+	defer helpers.ErrorController(c.Controller, "ReporteSolicitudes")
+
+	var f models.FlitroReporte
+	var err1, err2, err3, err4 error
+
+	f.FacultadId = c.GetString("FacultadId")
+	f.ProyectoCurricularId = c.GetString("ProyectoCurricularId")
+	f.Vigencia = c.GetString("Vigencia")
+	f.Mes = c.GetString("Mes")
+
+	if f.FacultadId == "" || f.Vigencia == "" {
+		panic(map[string]interface{}{"funcion": "ReporteSolicitudes", "err": helpers.ErrorBody, "status": "403"})
+	}
+
+	if len(f.FacultadId) > 0 {
+		_, err1 = strconv.Atoi(f.Vigencia)
+	}
+	if len(f.Mes) > 0 {
+		_, err2 = strconv.Atoi(f.Mes)
+	}
+	if len(f.FacultadId) > 0 {
+		_, err3 = strconv.Atoi(f.FacultadId)
+	}
+	if len(f.ProyectoCurricularId) > 0 {
+		_, err4 = strconv.Atoi(f.ProyectoCurricularId)
+	}
+
+	if err1 != nil || err2 != nil || err3 != nil || err4 != nil {
+		panic(map[string]interface{}{"funcion": "GetAll", "err": helpers.ErrorParametros, "status": "400"})
+	}
+
+	if data, err4 := helpers.ReporteSolicitudes(f); err4 == nil {
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "reporte obtenido con exito", "Data": data}
+	} else {
+		panic(map[string]interface{}{"funcion": "ReporteSolicitudes", "err": err2, "status": "400"})
 	}
 
 	c.ServeJSON()

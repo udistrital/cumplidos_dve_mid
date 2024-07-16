@@ -177,6 +177,122 @@ func CertificacionVistoBueno(dependencia string, mes string, anio string) (perso
 	return personas, outputError
 }
 
+func ReporteSolicitudes(f models.FlitroReporte) (reporte []models.DatosReporte, outputError map[string]interface{}) {
+	defer func() {
+		if err := recover(); err != nil {
+			outputError = map[string]interface{}{"function": "ReporteSolicitudes", "err": err, "status": "500"}
+			panic(outputError)
+		}
+	}()
+
+	var dependencias []models.Dependencia
+	var vinculaciones_dependencia []models.VinculacionDocente
+	var vinculaciones_facultad []models.VinculacionDocente
+	var pagos_mensuales []models.PagoMensual
+
+	//Se obtienen todas las dependencias hijas de la facultad
+	url := "dependencia/proyectosPorFacultad/" + f.FacultadId
+	if err := GetRequestLegacy("CumplidosDveUrlCrudOikos", url, &dependencias); err == nil {
+	} else {
+		panic(err.Error())
+	}
+
+	//Se valida si se desea consultar de toda la facultad o de un proyecto en especifico
+	if len(f.ProyectoCurricularId) == 0 {
+		//Se obtienen los contratos en resoluciones asociados a las dependencias hijas y la vigencia
+		for _, dependencia := range dependencias {
+			url2 := "vinculacion_docente/?limit=-1&query=activo:true,proyecto_curricular_id:" + strconv.Itoa(dependencia.Id) + ",vigencia:" + f.Vigencia
+			if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", url2, &vinculaciones_dependencia); err == nil {
+				if len(vinculaciones_dependencia) != 0 {
+					vinculaciones_facultad = append(vinculaciones_facultad, vinculaciones_dependencia...)
+				}
+			} else {
+				panic(err.Error())
+			}
+		}
+		reporte, outputError = llenaListadoReporte(vinculaciones_facultad, pagos_mensuales, dependencias, f)
+
+	} else {
+		// Se obtienen los contratos en resoluciones asociados a la dependencia
+		url6 := "vinculacion_docente/?limit=-1&query=activo:true,proyecto_curricular_id:" + f.ProyectoCurricularId + ",vigencia:" + f.Vigencia
+		if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", url6, &vinculaciones_dependencia); err == nil {
+			// Se busca contrato y vigencia en cumplidos_dve pago_mensual
+			reporte, outputError = llenaListadoReporte(vinculaciones_dependencia, pagos_mensuales, dependencias, f)
+
+		} else {
+			panic(err.Error())
+		}
+	}
+	return reporte, outputError
+}
+
+func llenaListadoReporte(vinculaciones []models.VinculacionDocente, pagos_mensuales []models.PagoMensual, dependencias []models.Dependencia, f models.FlitroReporte) (listado_reporte []models.DatosReporte, outputError map[string]interface{}) {
+
+	defer func() {
+		if err := recover(); err != nil {
+			outputError = map[string]interface{}{"function": "llenaListadoReporte", "err": err, "status": "500"}
+			panic(outputError)
+		}
+	}()
+
+	var data_reporte models.DatosReporte
+	// Se busca contrato y vigencia en cumplidos_dve pago_mensual
+	for _, vinculacion := range vinculaciones {
+		if len(vinculacion.NumeroContrato) != 0 {
+			url3 := "pago_mensual/?limit=-1&query=NumeroContrato:" + vinculacion.NumeroContrato + ",VigenciaContrato:" + strconv.FormatInt(vinculacion.Vigencia, 10)
+			if f.Mes != "" {
+				url3 = url3 + ",Mes:" + f.Mes
+			}
+			if err := GetRequestNew("CumplidosDveUrlCrud", url3, &pagos_mensuales); err == nil {
+				for _, pago_mensual := range pagos_mensuales {
+
+					var parametro models.Parametro
+					var docente []models.InformacionProveedor
+
+					// Obtén el nombre de la dependencia
+					nombre_dependencia := obtenerNombreDependencia(strconv.Itoa(vinculacion.ProyectoCurricularId), dependencias)
+
+					//Consultar y obtener el nombre del estado en parametros
+					url4 := "parametro/" + strconv.Itoa(pago_mensual.EstadoPagoMensualId)
+					if err := GetRequestNew("CumplidosDveUrlParametros", url4, &parametro); err == nil {
+						data_reporte.Estado = parametro.Nombre
+
+					} else {
+						panic(err.Error())
+					}
+
+					//Consultar el nombre del docente en agora
+					url5 := "informacion_proveedor/?query=NumDocumento:" + pago_mensual.Persona
+					if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", url5, &docente); err == nil {
+						data_reporte.NombrePersona = docente[0].NomProveedor
+					} else {
+						panic(err.Error())
+					}
+					data_reporte.Ano = pago_mensual.Ano
+					data_reporte.Documento = pago_mensual.Persona
+					data_reporte.Id = pago_mensual.Id
+					data_reporte.Mes = pago_mensual.Mes
+					data_reporte.NumeroContrato = pago_mensual.NumeroContrato
+					data_reporte.ProyectoCurricular = nombre_dependencia
+				}
+				listado_reporte = append(listado_reporte, data_reporte)
+			} else {
+				panic(err.Error())
+			}
+		}
+	}
+	return listado_reporte, outputError
+}
+
+func obtenerNombreDependencia(id string, dependencias []models.Dependencia) string {
+	for _, dependencia := range dependencias {
+		if strconv.Itoa(dependencia.Id) == id {
+			return dependencia.Nombre
+		}
+	}
+	return ""
+}
+
 func GenerarPDF(nombre string, proyecto_curricular string, docentes_incumplidos []models.Persona, facultad string, mes string, anio string, periodo string) (encodedPdf string, outputError map[string]interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
