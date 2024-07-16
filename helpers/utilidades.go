@@ -408,3 +408,8 @@ func ErrorController(c beego.Controller, controller string) {
 		}
 	}
 }
+
+func RemoverEspaciosExtra(s string) string {
+	espacios := strings.Fields(s)
+	return strings.Join(espacios, " ")
+}

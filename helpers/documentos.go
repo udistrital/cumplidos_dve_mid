@@ -265,7 +265,7 @@ func llenaListadoReporte(vinculaciones []models.VinculacionDocente, pagos_mensua
 						//Consultar el nombre del docente en agora
 						url3 := "informacion_proveedor/?query=NumDocumento:" + pago_mensual.Persona
 						if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", url3, &docente); err == nil {
-							data_reporte.NombrePersona = docente[0].NomProveedor
+							data_reporte.NombrePersona = RemoverEspaciosExtra(docente[0].NomProveedor)
 						} else {
 							panic(err.Error())
 						}
@@ -273,7 +273,7 @@ func llenaListadoReporte(vinculaciones []models.VinculacionDocente, pagos_mensua
 						//Consultar el nombre del responsable en agora
 						url4 := "informacion_proveedor/?query=NumDocumento:" + pago_mensual.Responsable
 						if err := GetRequestLegacy("CumplidosDveUrlCrudAgora", url4, &docente); err == nil {
-							data_reporte.NombreResponsable = docente[0].NomProveedor
+							data_reporte.NombreResponsable = RemoverEspaciosExtra(docente[0].NomProveedor)
 						} else {
 							panic(err.Error())
 						}
