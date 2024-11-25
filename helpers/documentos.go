@@ -286,7 +286,7 @@ func ConstruirDocumento(nombre string, proyecto_curricular string, docentes_incu
 	pdf.Ln(lineHeight + 18)
 
 	pdf.SetFont(Calibri, "", fontSize)
-	pdf.MultiCell(0, lineHeight+1, "Los Docentes de Vinculación Especial contratados para el periodo Académico "+periodo+", del Proyecto Curricular de "+proyecto+" cumplieron a cabalidad con las funciones docentes durante el mes de "+mes+" de "+anio+" (según calendario académico).", "", "J", false)
+	pdf.MultiCell(0, lineHeight+1, "Los Docentes de Vinculación Especial contratados para el periodo Académico "+periodo+", del Proyecto Curricular de "+proyecto+" cumplieron con las actividades propias de su vinculación durante el mes de "+mes+" del año "+anio+".", "", "J", false)
 	pdf.Ln(lineHeight * 3)
 
 	if docentes_incumplidos != nil {
