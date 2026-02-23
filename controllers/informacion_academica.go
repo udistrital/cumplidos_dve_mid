@@ -98,7 +98,7 @@ func (c *InformacionAcademicaController) GetDocentesCoordinador() {
 	c.Data["json"] = map[string]interface{}{
 		"Success": true,
 		"Status":  "200",
-		"Message": "Docentes cargados con éxito",
+		"Message": "Docentes cargados",
 		"Data":    data,
 	}
 	c.ServeJSON()
