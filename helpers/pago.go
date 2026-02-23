@@ -392,7 +392,7 @@ func ConstruirDocumentoOrdenador(nombre string, facultad string, dependencia str
 	pdf.Ln(lineHeight + 18)
 
 	pdf.SetFont(Calibri, "", fontSize)
-	pdf.MultiCell(0, lineHeight+1, "De acuerdo a la información suministrada por los proyectos curriculares de la "+dependencia_nombre+", los profesores de Vinculación Especial contratados para el periodo académico "+periodo+", cumplieron a cabalidad con las funciones docentes en el mes de "+mes+" del presente año.(De acuerdo a calendario académico)", "", "J", false)
+	pdf.MultiCell(0, lineHeight+1, "De acuerdo a la información suministrada por los proyectos curriculares de la "+dependencia_nombre+", los profesores de Vinculación Especial contratados para el periodo académico "+periodo+", cumplieron con las actividades propias de su vinculación durante el mes de "+mes+" del año "+anio+".", "", "J", false)
 	pdf.Ln(lineHeight * 3)
 
 	if docentes_incumplidos != nil {

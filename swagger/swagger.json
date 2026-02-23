@@ -484,6 +484,36 @@
                 }
             }
         },
+        "/informacion_academica/docentes_coordinador/{proyectoId}": {
+            "get": {
+                "tags": [
+                    "informacion_academica"
+                ],
+                "description": "Retorna docentes a cargo del proyecto curricular (por proyectoId)",
+                "operationId": "InformacionAcademicaController.GetDocentesCoordinador",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "proyectoId",
+                        "description": "ID del proyecto curricular (OIKOS)",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.DocentesCoordinadorResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                }
+            }
+        },
         "/informacion_academica/informacion_coordinador/{id_dependencia_oikos}": {
             "get": {
                 "tags": [
@@ -518,6 +548,10 @@
     "definitions": {
         "models.ContratosDocentes": {
             "title": "ContratosDocentes",
+            "type": "object"
+        },
+        "models.DocentesCoordinadorResponse": {
+            "title": "DocentesCoordinadorResponse",
             "type": "object"
         }
     },

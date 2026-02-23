@@ -408,3 +408,16 @@ func ErrorController(c beego.Controller, controller string) {
 		}
 	}
 }
+
+type MapError map[string]interface{}
+
+func (e MapError) Error() string {
+	// intenta sacar un mensaje estándar
+	if msg, ok := e["Message"].(string); ok && msg != "" {
+		return msg
+	}
+	if msg, ok := e["message"].(string); ok && msg != "" {
+		return msg
+	}
+	return "error"
+}

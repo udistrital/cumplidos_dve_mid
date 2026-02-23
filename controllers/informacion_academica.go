@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/cumplidos_dve_mid/helpers"
+	"github.com/udistrital/cumplidos_dve_mid/services"
 )
 
 // InformacionAcademicaController operations for InformacionAcademica
@@ -16,6 +18,7 @@ type InformacionAcademicaController struct {
 func (c *InformacionAcademicaController) URLMapping() {
 	c.Mapping("ObtenerInfoCoordinador", c.ObtenerInfoCoordinador)
 	c.Mapping("GetContratosDocente", c.GetContratosDocente)
+	c.Mapping("GetDocentesCoordinador", c.GetDocentesCoordinador)
 }
 
 // InformacionAcademicaController ...
@@ -52,7 +55,6 @@ func (c *InformacionAcademicaController) ObtenerInfoCoordinador() {
 // @Success 201 {object} []models.ContratosDocentes
 // @Failure 403 body is empty
 // @router /contratos_docente/:numDocumento [get]
-
 func (c *InformacionAcademicaController) GetContratosDocente() {
 	defer helpers.ErrorController(c.Controller, "InformacionAcademicaController")
 
@@ -70,5 +72,34 @@ func (c *InformacionAcademicaController) GetContratosDocente() {
 		panic(map[string]interface{}{"funcion": "GetContratosDocente", "err": err2, "status": "400"})
 	}
 
+	c.ServeJSON()
+}
+
+// @Title GetDocentesCoordinador
+// @Description Retorna docentes a cargo del proyecto curricular (por proyectoId)
+// @Param   proyectoId   path   int  true  "ID del proyecto curricular (OIKOS)"
+// @Success 200 {object} models.DocentesCoordinadorResponse
+// @Failure 400 Bad Request
+// @router /docentes_coordinador/:proyectoId [get]
+func (c *InformacionAcademicaController) GetDocentesCoordinador() {
+	defer helpers.ErrorController(c.Controller, "InformacionAcademicaController")
+
+	proyectoStr := c.Ctx.Input.Param(":proyectoId")
+	proyectoId, err := strconv.Atoi(proyectoStr)
+	if err != nil || proyectoId <= 0 {
+		panic(map[string]interface{}{"funcion": "GetDocentesCoordinador", "err": helpers.ErrorParametros, "status": "400"})
+	}
+
+	data, svcErr := services.GetDocentesProyecto(proyectoId)
+	if svcErr != nil {
+		panic(map[string]interface{}{"funcion": "GetDocentesCoordinador", "err": fmt.Errorf("%v", svcErr), "status": "400"})
+	}
+
+	c.Data["json"] = map[string]interface{}{
+		"Success": true,
+		"Status":  "200",
+		"Message": "Docentes cargados con éxito",
+		"Data":    data,
+	}
 	c.ServeJSON()
 }
