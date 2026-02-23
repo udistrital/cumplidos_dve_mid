@@ -308,27 +308,26 @@ paths:
           description: ""
         "403":
           description: :docordenador is empty
-  /informacion_academica/contratos_docente/{numDocumento}:
+  /informacion_academica/docentes_coordinador/{proyectoId}:
     get:
       tags:
       - informacion_academica
-      description: create GetContratosDocente
-      operationId: InformacionAcademicaController.GetContratosDocente
+      description: Retorna docentes a cargo del proyecto curricular (por proyectoId)
+      operationId: InformacionAcademicaController.GetDocentesCoordinador
       parameters:
-      - in: query
-        name: numDocumento
-        description: Docente a consultar
+      - in: path
+        name: proyectoId
+        description: ID del proyecto curricular (OIKOS)
         required: true
-        type: string
+        type: integer
+        format: int64
       responses:
-        "201":
+        "200":
           description: ""
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/models.ContratosDocentes'
-        "403":
-          description: body is empty
+            $ref: '#/definitions/models.DocentesCoordinadorResponse'
+        "400":
+          description: Bad Request
   /informacion_academica/informacion_coordinador/{id_dependencia_oikos}:
     get:
       tags:
@@ -350,8 +349,8 @@ paths:
         "403":
           description: :id_dependencia_oikos is empty
 definitions:
-  models.ContratosDocentes:
-    title: ContratosDocentes
+  models.DocentesCoordinadorResponse:
+    title: DocentesCoordinadorResponse
     type: object
 tags:
 - name: informacion_academica

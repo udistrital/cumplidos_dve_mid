@@ -452,34 +452,32 @@
                 }
             }
         },
-        "/informacion_academica/contratos_docente/{numDocumento}": {
+        "/informacion_academica/docentes_coordinador/{proyectoId}": {
             "get": {
                 "tags": [
                     "informacion_academica"
                 ],
-                "description": "create GetContratosDocente",
-                "operationId": "InformacionAcademicaController.GetContratosDocente",
+                "description": "Retorna docentes a cargo del proyecto curricular (por proyectoId)",
+                "operationId": "InformacionAcademicaController.GetDocentesCoordinador",
                 "parameters": [
                     {
-                        "in": "query",
-                        "name": "numDocumento",
-                        "description": "Docente a consultar",
+                        "in": "path",
+                        "name": "proyectoId",
+                        "description": "ID del proyecto curricular (OIKOS)",
                         "required": true,
-                        "type": "string"
+                        "type": "integer",
+                        "format": "int64"
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.ContratosDocentes"
-                            }
+                            "$ref": "#/definitions/models.DocentesCoordinadorResponse"
                         }
                     },
-                    "403": {
-                        "description": "body is empty"
+                    "400": {
+                        "description": "Bad Request"
                     }
                 }
             }
@@ -516,8 +514,8 @@
         }
     },
     "definitions": {
-        "models.ContratosDocentes": {
-            "title": "ContratosDocentes",
+        "models.DocentesCoordinadorResponse": {
+            "title": "DocentesCoordinadorResponse",
             "type": "object"
         }
     },

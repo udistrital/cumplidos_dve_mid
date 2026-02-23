@@ -39,7 +39,7 @@ func CargarCertificacionDocumentosAprobados(dependencia string, mes string, anio
 	contrato_ordenador_dependencia = GetContratosOrdenadorDependencia(dependencia, anio+"-"+mes, anio+"-"+mes)
 	if len(contrato_ordenador_dependencia.ContratosOrdenadorDependencia.InformacionContratos) != 0 {
 		for _, contrato := range contrato_ordenador_dependencia.ContratosOrdenadorDependencia.InformacionContratos {
-			if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=NumeroContrato:"+contrato.NumeroContrato+",Vigencia:"+contrato.Vigencia, &vinculaciones_docente); err == nil {
+			if err := GetRequestNew("CumplidosDveUrlCrudResoluciones", "vinculacion_docente/?limit=-1&query=NumeroContrato:"+contrato.NumeroContrato+",Vigencia:"+contrato.Vigencia+",Activo:true", &vinculaciones_docente); err == nil {
 				for _, vinculacion_docente := range vinculaciones_docente {
 					if vinculacion_docente.NumeroContrato != "" {
 						if err := GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:AP_DVE", &parametro); err == nil {
@@ -166,8 +166,10 @@ func ObtenerDependenciaOrdenador(doc_ordenador string) (resultado int, outputErr
 
 	var ordenadores_gasto []models.OrdenadorGasto
 	var jefes_dependencia []models.JefeDependencia
+	fecha_actual := time.Now()
+	fecha := fecha_actual.Format("2006-01-02")
 
-	if err := GetRequestLegacy("CumplidosDveUrlCore", "jefe_dependencia/?query=TerceroId:"+doc_ordenador+"&sortby=FechaFin&order=desc&limit=1", &jefes_dependencia); err == nil {
+	if err := GetRequestLegacy("CumplidosDveUrlCore", "jefe_dependencia/?query=TerceroId:"+doc_ordenador+",FechaFin__gte:"+fecha+",FechaInicio__lte:"+fecha, &jefes_dependencia); err == nil {
 		for _, jefe := range jefes_dependencia {
 			if err := GetRequestLegacy("CumplidosDveUrlCore", "ordenador_gasto/?query=DependenciaId:"+strconv.Itoa(jefe.DependenciaId), &ordenadores_gasto); err == nil {
 				for _, ordenador := range ordenadores_gasto {
@@ -390,7 +392,7 @@ func ConstruirDocumentoOrdenador(nombre string, facultad string, dependencia str
 	pdf.Ln(lineHeight + 18)
 
 	pdf.SetFont(Calibri, "", fontSize)
-	pdf.MultiCell(0, lineHeight+1, "De acuerdo a la información suministrada por los proyectos curriculares de la "+dependencia_nombre+", los profesores de Vinculación Especial contratados para el periodo académico "+periodo+", cumplieron a cabalidad con las funciones docentes en el mes de "+mes+" del presente año.(De acuerdo a calendario académico)", "", "J", false)
+	pdf.MultiCell(0, lineHeight+1, "De acuerdo a la información suministrada por los proyectos curriculares de la "+dependencia_nombre+", los profesores de Vinculación Especial contratados para el periodo académico "+periodo+", cumplieron con las actividades propias de su vinculación durante el mes de "+mes+" del año "+anio+".", "", "J", false)
 	pdf.Ln(lineHeight * 3)
 
 	if docentes_incumplidos != nil {
@@ -408,7 +410,7 @@ func ConstruirDocumentoOrdenador(nombre string, facultad string, dependencia str
 	}
 
 	pdf.Ln(lineHeight * 3)
-	pdf.WriteAligned(0, lineHeight+1, "La presente certificación se expide con destino a la División de Recursos Humanos el día "+strconv.Itoa(now.Day())+" del mes de "+meses[now.Month()]+" de "+strconv.Itoa(now.Year())+".", "")
+	pdf.WriteAligned(0, lineHeight+1, "La presente certificación se expide con destino a la Oficina de Talento Humano el día "+strconv.Itoa(now.Day())+" del mes de "+meses[now.Month()]+" de "+strconv.Itoa(now.Year())+".", "")
 	pdf.Ln(lineHeight * 12)
 
 	pdf.SetFont(MinionProBoldCn, "B", fontSize)
