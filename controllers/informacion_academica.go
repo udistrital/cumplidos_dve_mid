@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/cumplidos_dve_mid/helpers"
+	"github.com/udistrital/cumplidos_dve_mid/services"
 )
 
 // InformacionAcademicaController operations for InformacionAcademica
@@ -53,7 +55,6 @@ func (c *InformacionAcademicaController) ObtenerInfoCoordinador() {
 // @Success 201 {object} []models.ContratosDocentes
 // @Failure 403 body is empty
 // @router /contratos_docente/:numDocumento [get]
-
 func (c *InformacionAcademicaController) GetContratosDocente() {
 	defer helpers.ErrorController(c.Controller, "InformacionAcademicaController")
 
@@ -83,36 +84,15 @@ func (c *InformacionAcademicaController) GetContratosDocente() {
 func (c *InformacionAcademicaController) GetDocentesCoordinador() {
 	defer helpers.ErrorController(c.Controller, "InformacionAcademicaController")
 
-	ctx := c.Ctx.Request.Context()
-	ctx, seg := xray2.BeginSegmentWithContextTP(
-		ctx,
-		"Cumplidos_DVE_MID",
-		c.Ctx.Request.Method,
-		c.Ctx.Request.URL.String(),
-		200,
-		c.Ctx.Request.URL.String(),
-		c.Ctx.Request.Header.Values("X-Amzn-Trace-Id"),
-	)
-	defer seg.Close(nil)
-
-	_, subseg := xray.BeginSubsegment(ctx, "GetDocentesCoordinador")
-	defer subseg.Close(nil)
-
-	xray2.SetContext(ctx)
-
 	proyectoStr := c.Ctx.Input.Param(":proyectoId")
 	proyectoId, err := strconv.Atoi(proyectoStr)
 	if err != nil || proyectoId <= 0 {
-		xray2.BeginSubSegmentWithContext(subseg, c.Ctx.Request.Method, c.Ctx.Request.URL.String(), 400)
-		xray.AddError(ctx, fmt.Errorf("%v", helpers.ErrorParametros))
 		panic(map[string]interface{}{"funcion": "GetDocentesCoordinador", "err": helpers.ErrorParametros, "status": "400"})
 	}
 
 	data, svcErr := services.GetDocentesProyecto(proyectoId)
 	if svcErr != nil {
-		xray2.BeginSubSegmentWithContext(subseg, c.Ctx.Request.Method, c.Ctx.Request.URL.String(), 400)
-		xray.AddError(ctx, fmt.Errorf("%v", svcErr))
-		panic(map[string]interface{}{"funcion": "GetDocentesCoordinador", "err": svcErr, "status": "400"})
+		panic(map[string]interface{}{"funcion": "GetDocentesCoordinador", "err": fmt.Errorf("%v", svcErr), "status": "400"})
 	}
 
 	c.Data["json"] = map[string]interface{}{
@@ -121,6 +101,5 @@ func (c *InformacionAcademicaController) GetDocentesCoordinador() {
 		"Message": "Docentes cargados con éxito",
 		"Data":    data,
 	}
-	c.Ctx.Request = c.Ctx.Request.WithContext(ctx)
 	c.ServeJSON()
 }

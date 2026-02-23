@@ -452,6 +452,38 @@
                 }
             }
         },
+        "/informacion_academica/contratos_docente/{numDocumento}": {
+            "get": {
+                "tags": [
+                    "informacion_academica"
+                ],
+                "description": "create GetContratosDocente",
+                "operationId": "InformacionAcademicaController.GetContratosDocente",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "numDocumento",
+                        "description": "Docente a consultar",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.ContratosDocentes"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
         "/informacion_academica/docentes_coordinador/{proyectoId}": {
             "get": {
                 "tags": [
@@ -514,6 +546,10 @@
         }
     },
     "definitions": {
+        "models.ContratosDocentes": {
+            "title": "ContratosDocentes",
+            "type": "object"
+        },
         "models.DocentesCoordinadorResponse": {
             "title": "DocentesCoordinadorResponse",
             "type": "object"
