@@ -27,6 +27,15 @@ func init() {
 
     beego.GlobalControllerRouter["github.com/udistrital/cumplidos_dve_mid/controllers:AprobacionDocumentosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/cumplidos_dve_mid/controllers:AprobacionDocumentosController"],
         beego.ControllerComments{
+            Method: "EnviarAprobarSolicitudesCoordinador",
+            Router: "/enviar_aprobar_solicitudes_coordinador",
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/cumplidos_dve_mid/controllers:AprobacionDocumentosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/cumplidos_dve_mid/controllers:AprobacionDocumentosController"],
+        beego.ControllerComments{
             Method: "GenerarCertificado",
             Router: "/generar_certificado/:nombre/:proyecto_curricular/:dependencia/:facultad/:mes/:anio/:periodo",
             AllowHTTPMethods: []string{"get"},
@@ -136,7 +145,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/cumplidos_dve_mid/controllers:InformacionAcademicaController"] = append(beego.GlobalControllerRouter["github.com/udistrital/cumplidos_dve_mid/controllers:InformacionAcademicaController"],
         beego.ControllerComments{
             Method: "GetDocentesCoordinador",
-            Router: "/docentes_coordinador/:proyectoId",
+            Router: "/docentes_coordinador/:proyectoId/:vigencia/:mes/:anio",
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,

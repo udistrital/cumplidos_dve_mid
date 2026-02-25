@@ -343,3 +343,23 @@ func AprobarMultiplesSolicitudes(v []models.PagoMensual) (resultado string, outp
 	}
 	return resultado, outputError
 }
+func HelpersGetID(created interface{}) int {
+	m, ok := created.(map[string]interface{})
+	if !ok {
+		return 0
+	}
+	if v, ok := m["Id"]; ok {
+		if f, ok := v.(float64); ok {
+			return int(f)
+		}
+	}
+	if d, ok := m["Data"].(map[string]interface{}); ok {
+		if v, ok := d["Id"]; ok {
+			if f, ok := v.(float64); ok {
+				return int(f)
+			}
+		}
+	}
+
+	return 0
+}

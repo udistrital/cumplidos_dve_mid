@@ -8,7 +8,7 @@ import (
 	"github.com/udistrital/cumplidos_dve_mid/helpers"
 )
 
-func GetResolucionesEnEstadoActivo(proyectoId int) (res []map[string]interface{}, err error) {
+func GetResolucionesEnEstadoActivo(proyectoId int, vigencia int, mes int, anio int) (res []map[string]interface{}, err error) {
 	var outputError map[string]interface{}
 
 	defer func() {
@@ -26,7 +26,7 @@ func GetResolucionesEnEstadoActivo(proyectoId int) (res []map[string]interface{}
 	var vinculaciones []map[string]interface{}
 	if e := helpers.GetRequestNew(
 		"CumplidosDveUrlCrudResoluciones",
-		"vinculacion_docente/?query=ProyectoCurricularId:"+strconv.Itoa(proyectoId)+",NumeroContrato__isnull:false",
+		"vinculacion_docente/?query=ProyectoCurricularId:"+strconv.Itoa(proyectoId)+",NumeroContrato__isnull:false,Vigencia:"+strconv.Itoa(vigencia),
 		&vinculaciones,
 	); e != nil {
 		panic(e.Error())
@@ -81,17 +81,44 @@ func GetResolucionesEnEstadoActivo(proyectoId int) (res []map[string]interface{}
 		if len(estados) == 0 {
 			continue
 		}
+		personaVal, ok := v["PersonaId"]
+		if !ok || personaVal == nil {
+			continue
+		}
 
+		personaStr := ""
+		switch t := personaVal.(type) {
+		case float64:
+			personaStr = strconv.Itoa(int(t))
+		case int:
+			personaStr = strconv.Itoa(t)
+		case string:
+			personaStr = strings.TrimSpace(t)
+		default:
+			continue
+		}
+
+		if personaStr == "" {
+			continue
+		}
+
+		var pagos []map[string]interface{}
+		qPago := "pago_mensual/?limit=1&query=NumeroContrato:" + fmt.Sprint(num) +
+			",VigenciaContrato:" + strconv.Itoa(vigencia) +
+			",Mes:" + strconv.Itoa(mes) +
+			",Ano:" + strconv.Itoa(anio) +
+			",Persona:" + personaStr
+
+		if e := helpers.GetRequestNew("CumplidosDveUrlCrud", qPago, &pagos); e != nil {
+			v["TienePagoMensual"] = nil
+			res = append(res, v)
+			continue
+		}
+
+		tienePago := len(pagos) > 0
+		v["TienePagoMensual"] = tienePago
 		res = append(res, v)
 	}
 
 	return res, nil
-}
-
-func keysOf(m map[string]interface{}) []string {
-	out := make([]string, 0, len(m))
-	for k := range m {
-		out = append(out, k)
-	}
-	return out
 }
