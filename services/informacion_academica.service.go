@@ -2,12 +2,15 @@ package services
 
 import "fmt"
 
-func GetDocentesProyecto(proyectoId int) ([]map[string]interface{}, error) {
+func GetDocentesProyecto(proyectoId int, vigencia int, mes int, anio int) ([]map[string]interface{}, error) {
 	if proyectoId <= 0 {
 		return nil, fmt.Errorf("proyectoId inválido")
 	}
+	if vigencia <= 0 {
+		return nil, fmt.Errorf("vigencia inválida")
+	}
 
-	resOk, err := GetResolucionesEnEstadoActivo(proyectoId)
+	resOk, err := GetResolucionesEnEstadoActivo(proyectoId, vigencia, mes, anio)
 	if err != nil {
 		return nil, err
 	}
@@ -27,6 +30,7 @@ func limpiarDocentesCamposSlice(resOk []map[string]interface{}) []map[string]int
 			"NumeroContrato":                 m["NumeroContrato"],
 			"ResolucionVinculacionDocenteId": m["ResolucionVinculacionDocenteId"],
 			"Id":                             m["Id"],
+			"PagoMensual":                    m["TienePagoMensual"],
 		})
 	}
 

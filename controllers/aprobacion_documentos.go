@@ -6,6 +6,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/udistrital/cumplidos_dve_mid/helpers"
 	"github.com/udistrital/cumplidos_dve_mid/models"
+	"github.com/udistrital/cumplidos_dve_mid/services"
 )
 
 // AprobacionDocumentosController operations for AprobacionDocumentos
@@ -20,6 +21,7 @@ func (c *AprobacionDocumentosController) URLMapping() {
 	c.Mapping("CertificacionVistoBueno", c.CertificacionVistoBueno)
 	c.Mapping("GenerarCertificado", c.GenerarCertificado)
 	c.Mapping("AprobarSolicitudes", c.AprobarSolicitudes)
+	c.Mapping("EnviarAprobarSolicitudesCoordinador", c.EnviarAprobarSolicitudesCoordinador)
 }
 
 // AprobacionDocumentosController ...
@@ -196,6 +198,43 @@ func (c *AprobacionDocumentosController) AprobarSolicitudes() {
 		}
 	} else {
 		panic(map[string]interface{}{"funcion": "AprobarSolicitudes", "err": err.Error(), "status": "400"})
+	}
+
+	c.ServeJSON()
+}
+
+// AprobacionDocumentosController ...
+// @Title EnviarAprobarSolicitudesCoordinador
+// @Description Aprueba (lado coordinador) y envía al ordenador del gasto una lista de solicitudes
+// @Success 200
+// @Failure 400
+// @router /enviar_aprobar_solicitudes_coordinador [post]
+func (c *AprobacionDocumentosController) EnviarAprobarSolicitudesCoordinador() {
+	defer helpers.ErrorController(c.Controller, "AprobacionDocumentosController")
+
+	if v, e := helpers.ValidarBody(c.Ctx.Input.RequestBody); !v || e != nil {
+		panic(map[string]interface{}{"funcion": "EnviarAprobarSolicitudesCoordinador", "err": helpers.ErrorBody, "status": "400"})
+	}
+
+	var req models.EnviarAprobarSolicitudesCoordinadorRequest
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &req); err != nil {
+		panic(map[string]interface{}{"funcion": "EnviarAprobarSolicitudesCoordinador", "err": err.Error(), "status": "400"})
+	}
+
+	if req.Coordinador == "" || len(req.Docentes) == 0 {
+		panic(map[string]interface{}{"funcion": "EnviarAprobarSolicitudesCoordinador", "err": helpers.ErrorParametros, "status": "400"})
+	}
+
+	if data, err2 := services.EnviarYAprobarSolicitudesCoordinador(req); err2 == nil {
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = map[string]interface{}{
+			"Success": true,
+			"Status":  "200",
+			"Message": "Solicitudes procesadas",
+			"Data":    data,
+		}
+	} else {
+		panic(map[string]interface{}{"funcion": "EnviarAprobarSolicitudesCoordinador", "err": err2, "status": "400"})
 	}
 
 	c.ServeJSON()
