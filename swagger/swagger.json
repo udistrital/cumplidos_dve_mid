@@ -75,6 +75,23 @@
                 }
             }
         },
+        "/aprobacion_documentos/enviar_aprobar_solicitudes_coordinador": {
+            "post": {
+                "tags": [
+                    "aprobacion_documentos"
+                ],
+                "description": "Aprueba (lado coordinador) y envía al ordenador del gasto una lista de solicitudes",
+                "operationId": "AprobacionDocumentosController.EnviarAprobarSolicitudesCoordinador",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/aprobacion_documentos/generar_certificado/{nombre}/{proyecto_curricular}/{dependencia}/{facultad}/{mes}/{anio}/{periodo}": {
             "get": {
                 "tags": [
@@ -484,18 +501,42 @@
                 }
             }
         },
-        "/informacion_academica/docentes_coordinador/{proyectoId}": {
+        "/informacion_academica/docentes_coordinador/{proyectoId}/{vigencia}/{mes}/{anio}": {
             "get": {
                 "tags": [
                     "informacion_academica"
                 ],
-                "description": "Retorna docentes a cargo del proyecto curricular (por proyectoId)",
+                "description": "Retorna docentes a cargo del proyecto curricular (por proyectoId, vigencia, mes y año)",
                 "operationId": "InformacionAcademicaController.GetDocentesCoordinador",
                 "parameters": [
                     {
                         "in": "path",
                         "name": "proyectoId",
                         "description": "ID del proyecto curricular (OIKOS)",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "path",
+                        "name": "vigencia",
+                        "description": "Vigencia del contrato",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "path",
+                        "name": "mes",
+                        "description": "Mes (1-12)",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "path",
+                        "name": "anio",
+                        "description": "Año (ej: 2026)",
                         "required": true,
                         "type": "integer",
                         "format": "int64"

@@ -76,11 +76,14 @@ func (c *InformacionAcademicaController) GetContratosDocente() {
 }
 
 // @Title GetDocentesCoordinador
-// @Description Retorna docentes a cargo del proyecto curricular (por proyectoId)
+// @Description Retorna docentes a cargo del proyecto curricular (por proyectoId, vigencia, mes y año)
 // @Param   proyectoId   path   int  true  "ID del proyecto curricular (OIKOS)"
+// @Param   vigencia     path   int  true  "Vigencia del contrato"
+// @Param   mes          path   int  true  "Mes (1-12)"
+// @Param   anio         path   int  true  "Año (ej: 2026)"
 // @Success 200 {object} models.DocentesCoordinadorResponse
 // @Failure 400 Bad Request
-// @router /docentes_coordinador/:proyectoId [get]
+// @router /docentes_coordinador/:proyectoId/:vigencia/:mes/:anio [get]
 func (c *InformacionAcademicaController) GetDocentesCoordinador() {
 	defer helpers.ErrorController(c.Controller, "InformacionAcademicaController")
 
@@ -90,7 +93,25 @@ func (c *InformacionAcademicaController) GetDocentesCoordinador() {
 		panic(map[string]interface{}{"funcion": "GetDocentesCoordinador", "err": helpers.ErrorParametros, "status": "400"})
 	}
 
-	data, svcErr := services.GetDocentesProyecto(proyectoId)
+	vigenciaStr := c.Ctx.Input.Param(":vigencia")
+	vigencia, err := strconv.Atoi(vigenciaStr)
+	if err != nil || vigencia <= 0 {
+		panic(map[string]interface{}{"funcion": "GetDocentesCoordinador", "err": helpers.ErrorParametros, "status": "400"})
+	}
+
+	mesStr := c.Ctx.Input.Param(":mes")
+	mes, err := strconv.Atoi(mesStr)
+	if err != nil || mes < 1 || mes > 12 {
+		panic(map[string]interface{}{"funcion": "GetDocentesCoordinador", "err": helpers.ErrorParametros, "status": "400"})
+	}
+
+	anioStr := c.Ctx.Input.Param(":anio")
+	anio, err := strconv.Atoi(anioStr)
+	if err != nil || anio <= 0 {
+		panic(map[string]interface{}{"funcion": "GetDocentesCoordinador", "err": helpers.ErrorParametros, "status": "400"})
+	}
+
+	data, svcErr := services.GetDocentesProyecto(proyectoId, vigencia, mes, anio)
 	if svcErr != nil {
 		panic(map[string]interface{}{"funcion": "GetDocentesCoordinador", "err": fmt.Errorf("%v", svcErr), "status": "400"})
 	}
