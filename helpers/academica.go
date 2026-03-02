@@ -50,6 +50,7 @@ func CargarInformacionCoordinador(DependenciaOikosId int) (info_coordinador mode
 	} else {
 		panic(err.Error())
 	}
+
 	return info_coordinador, outputError
 }
 
@@ -97,6 +98,7 @@ func CargarContratosDocente(numDocumento int) (contratosDocentes []models.Contra
 									cd.NombreDocente = proveedor[0].NomProveedor
 									cd.Dedicacion = parametro[0].Nombre
 									contratosDocentes = append(contratosDocentes, cd)
+
 									//}
 								}
 							} else {
