@@ -35,7 +35,7 @@ func EnviarYAprobarSolicitudesCoordinador(req models.EnviarAprobarSolicitudesCoo
 		}
 	}()
 
-	const cargoOrdenadorFijo = "	// Param PAD_DVEORDENADOR DEL GASTO"
+	const cargoOrdenadorFijo = "ORDENADOR DEL GASTO"
 
 	var paramPAD []models.Parametro
 	if err := helpers.GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:PAD_DVE", &paramPAD); err != nil || len(paramPAD) == 0 {
