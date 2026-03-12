@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/udistrital/cumplidos_dve_mid/helpers"
+	"github.com/udistrital/cumplidos_dve_mid/models"
 )
 
 func GetResolucionesEnEstadoActivo(proyectoId int, vigencia int, mes int, anio int) (res []map[string]interface{}, err error) {
@@ -69,10 +70,16 @@ func GetResolucionesEnEstadoActivo(proyectoId int, vigencia int, mes int, anio i
 			continue
 		}
 
+		var paramRSOL []models.Parametro
+		if err := helpers.GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:RSOL", &paramRSOL); err != nil || len(paramRSOL) == 0 {
+			panic("No se pudo obtener el parámetro RSOL")
+		}
+		var RSOL = strconv.Itoa(paramRSOL[0].Id)
+
 		var estados []map[string]interface{}
 		if e := helpers.GetRequestNew(
 			"CumplidosDveUrlCrudResoluciones",
-			"resolucion_estado/?limit=1&query=ResolucionId__id:"+strconv.Itoa(rvdID)+",EstadoResolucionId:598", //671
+			"resolucion_estado/?limit=1&query=ResolucionId__id:"+strconv.Itoa(rvdID)+",EstadoResolucionId:"+RSOL, //671
 			&estados,
 		); e != nil {
 			continue
