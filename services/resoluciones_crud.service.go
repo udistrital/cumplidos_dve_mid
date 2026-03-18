@@ -27,7 +27,7 @@ func GetResolucionesEnEstadoActivo(proyectoId int, vigencia int, mes int, anio i
 	var vinculaciones []map[string]interface{}
 	if e := helpers.GetRequestNew(
 		"CumplidosDveUrlCrudResoluciones",
-		"vinculacion_docente/?limit=-1&query=ProyectoCurricularId:"+strconv.Itoa(proyectoId)+",NumeroContrato__isnull:false,Vigencia:"+strconv.Itoa(vigencia),
+		"vinculacion_docente/?limit=-1&query=ProyectoCurricularId:"+strconv.Itoa(proyectoId)+",Activo:true,NumeroContrato__isnull:false,Vigencia:"+strconv.Itoa(vigencia),
 		&vinculaciones,
 	); e != nil {
 		panic(e.Error())
