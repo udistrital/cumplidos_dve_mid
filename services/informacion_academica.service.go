@@ -90,6 +90,7 @@ func limpiarDocentesCamposSlice(resOk []map[string]interface{}) []map[string]int
 			"ResolucionVinculacionDocenteId": m["ResolucionVinculacionDocenteId"],
 			"Id":                             m["Id"],
 			"PagoMensual":                    m["TienePagoMensual"],
+			"NumeroResolucion":               m["NumeroResolucion"],
 		})
 	}
 
