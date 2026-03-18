@@ -37,16 +37,13 @@ func GetProyectoOikosIdDesdeSnies(proyectoId int) (int, error) {
 	if proyectoId <= 0 {
 		return 0, fmt.Errorf("proyectoId inválido")
 	}
-
 	var err error
 	var temp map[string]interface{}
 
 	url := beego.AppConfig.String("CumplidosDveUrlWso2") +
 		beego.AppConfig.String("CumplidosDveHomologacion") + "/" +
 		"proyecto_curricular_snies/" + strconv.Itoa(proyectoId)
-
 	if err = helpers.GetJsonWSO2(url, &temp); err == nil && temp != nil {
-
 		jsonHomologacion, errorJSON := json.Marshal(temp)
 		if errorJSON == nil {
 
