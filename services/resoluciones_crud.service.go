@@ -27,31 +27,25 @@ func GetResolucionesEnEstadoActivo(proyectoId int, vigencia int, mes int, anio i
 	var vinculaciones []map[string]interface{}
 	if e := helpers.GetRequestNew(
 		"CumplidosDveUrlCrudResoluciones",
-		"vinculacion_docente/?limit=-1&query=ProyectoCurricularId:"+strconv.Itoa(proyectoId)+",Activo:true,NumeroContrato__isnull:false,Vigencia:"+strconv.Itoa(vigencia),
+		"vinculacion_docente/?limit=-1&query=ProyectoCurricularId:"+strconv.Itoa(proyectoId)+",NumeroContrato__isnull:false,Vigencia:"+strconv.Itoa(vigencia),
 		&vinculaciones,
 	); e != nil {
 		panic(e.Error())
 	}
 
-	// Contadores
-	contadorContratoValido := 0
-	contadorConResolucionVinculacion := 0
-	contadorConResolucionActiva := 0
-	contadorConPersonaValida := 0
-	contadorConPagoMensual := 0
-	contadorSinPagoMensual := 0
-	contadorFinal := 0
-
 	var paramRSOL []models.Parametro
-	if err := helpers.GetRequestNew("CumplidosDveUrlParametros", "parametro/?query=CodigoAbreviacion:RSOL", &paramRSOL); err != nil || len(paramRSOL) == 0 {
+	if e := helpers.GetRequestNew(
+		"CumplidosDveUrlParametros",
+		"parametro/?query=CodigoAbreviacion:RSOL",
+		&paramRSOL,
+	); e != nil || len(paramRSOL) == 0 {
 		panic("No se pudo obtener el parámetro RSOL")
 	}
-	var RSOL = strconv.Itoa(paramRSOL[0].Id)
+	RSOL := strconv.Itoa(paramRSOL[0].Id)
 
 	res = make([]map[string]interface{}, 0, len(vinculaciones))
 
 	for _, v := range vinculaciones {
-
 		num, ok := v["NumeroContrato"]
 		if !ok || num == nil {
 			continue
@@ -59,7 +53,6 @@ func GetResolucionesEnEstadoActivo(proyectoId int, vigencia int, mes int, anio i
 		if s, ok := num.(string); ok && strings.TrimSpace(s) == "" {
 			continue
 		}
-		contadorContratoValido++
 
 		rawRvd, ok := v["ResolucionVinculacionDocenteId"]
 		if !ok || rawRvd == nil {
@@ -74,6 +67,8 @@ func GetResolucionesEnEstadoActivo(proyectoId int, vigencia int, mes int, anio i
 					rvdID = int(t)
 				case int:
 					rvdID = t
+				case int64:
+					rvdID = int(t)
 				case string:
 					if ii, e := strconv.Atoi(strings.TrimSpace(t)); e == nil {
 						rvdID = ii
@@ -85,7 +80,60 @@ func GetResolucionesEnEstadoActivo(proyectoId int, vigencia int, mes int, anio i
 		if rvdID <= 0 {
 			continue
 		}
-		contadorConResolucionVinculacion++
+
+		var resolucion map[string]interface{}
+		if e := helpers.GetRequestNew(
+			"CumplidosDveUrlCrudResoluciones",
+			"resolucion/"+strconv.Itoa(rvdID),
+			&resolucion,
+		); e != nil {
+			continue
+		}
+
+		activoResolucion := false
+		numeroResolucion := ""
+
+		dataResolucion := map[string]interface{}{}
+		if data, ok := resolucion["Data"]; ok {
+			if data == nil {
+				continue
+			}
+			if dataMap, ok := data.(map[string]interface{}); ok {
+				dataResolucion = dataMap
+			} else {
+				continue
+			}
+		} else {
+			dataResolucion = resolucion
+		}
+
+		if activoVal, ok := dataResolucion["Activo"]; ok && activoVal != nil {
+			switch t := activoVal.(type) {
+			case bool:
+				activoResolucion = t
+			case string:
+				activoResolucion = strings.EqualFold(strings.TrimSpace(t), "true")
+			}
+		}
+
+		if !activoResolucion {
+			continue
+		}
+
+		if nroVal, ok := dataResolucion["NumeroResolucion"]; ok && nroVal != nil {
+			switch t := nroVal.(type) {
+			case string:
+				numeroResolucion = strings.TrimSpace(t)
+			case float64:
+				numeroResolucion = strconv.Itoa(int(t))
+			case int:
+				numeroResolucion = strconv.Itoa(t)
+			case int64:
+				numeroResolucion = strconv.Itoa(int(t))
+			default:
+				numeroResolucion = fmt.Sprint(t)
+			}
+		}
 
 		var estados []map[string]interface{}
 		if e := helpers.GetRequestNew(
@@ -99,7 +147,6 @@ func GetResolucionesEnEstadoActivo(proyectoId int, vigencia int, mes int, anio i
 		if len(estados) == 0 {
 			continue
 		}
-		contadorConResolucionActiva++
 
 		personaVal, ok := v["PersonaId"]
 		if !ok || personaVal == nil {
@@ -112,6 +159,8 @@ func GetResolucionesEnEstadoActivo(proyectoId int, vigencia int, mes int, anio i
 			personaStr = strconv.Itoa(int(t))
 		case int:
 			personaStr = strconv.Itoa(t)
+		case int64:
+			personaStr = strconv.Itoa(int(t))
 		case string:
 			personaStr = strings.TrimSpace(t)
 		default:
@@ -121,7 +170,6 @@ func GetResolucionesEnEstadoActivo(proyectoId int, vigencia int, mes int, anio i
 		if personaStr == "" {
 			continue
 		}
-		contadorConPersonaValida++
 
 		var pagos []map[string]interface{}
 		qPago := "pago_mensual/?limit=1&query=NumeroContrato:" + fmt.Sprint(num) +
@@ -130,25 +178,21 @@ func GetResolucionesEnEstadoActivo(proyectoId int, vigencia int, mes int, anio i
 			",Ano:" + strconv.Itoa(anio) +
 			",Persona:" + personaStr
 
+		nuevo := make(map[string]interface{})
+		for k, val := range v {
+			nuevo[k] = val
+		}
+
 		if e := helpers.GetRequestNew("CumplidosDveUrlCrud", qPago, &pagos); e != nil {
-			v["TienePagoMensual"] = nil
-			contadorSinPagoMensual++
-			res = append(res, v)
-			contadorFinal++
+			nuevo["TienePagoMensual"] = nil
+			nuevo["NumeroResolucion"] = numeroResolucion
+			res = append(res, nuevo)
 			continue
 		}
 
-		tienePago := len(pagos) > 0
-		v["TienePagoMensual"] = tienePago
-
-		if tienePago {
-			contadorConPagoMensual++
-		} else {
-			contadorSinPagoMensual++
-		}
-
-		res = append(res, v)
-		contadorFinal++
+		nuevo["TienePagoMensual"] = len(pagos) > 0
+		nuevo["NumeroResolucion"] = numeroResolucion
+		res = append(res, nuevo)
 	}
 
 	return res, nil
